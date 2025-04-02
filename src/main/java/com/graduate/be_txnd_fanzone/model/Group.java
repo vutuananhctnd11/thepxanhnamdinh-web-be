@@ -7,14 +7,14 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @Entity
-@Table(name = "group")
+@Table(name = "social_group")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Group extends BaseModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id", nullable = false)
-    String groupId;
+    Long groupId;
 
     @Column(name = "group_name")
     String groupName;

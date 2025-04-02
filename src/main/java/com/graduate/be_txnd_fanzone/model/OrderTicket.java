@@ -14,7 +14,7 @@ public class OrderTicket extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_ticket_id", nullable = false)
-    String orderTicketId;
+    Long orderTicketId;
 
     @Column(name = "full_name", nullable = false)
     String fullName;

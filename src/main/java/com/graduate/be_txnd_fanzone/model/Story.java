@@ -14,7 +14,7 @@ public class Story extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "story_id", nullable = false)
-    String storyId;
+    Long storyId;
 
     @Column(name = "story_title")
     String storyTitle;

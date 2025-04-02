@@ -14,5 +14,5 @@ public class Reaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reaction_id", nullable = false)
-    String reactionId;
+    Long reactionId;
 }

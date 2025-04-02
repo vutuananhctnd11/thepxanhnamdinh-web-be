@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "match")
+@Table(name = "match_day")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Match extends BaseModel {
 

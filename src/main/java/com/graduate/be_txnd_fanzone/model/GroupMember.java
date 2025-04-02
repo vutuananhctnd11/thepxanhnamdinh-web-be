@@ -14,7 +14,7 @@ public class GroupMember extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_member_id", nullable = false)
-    String groupMemberId;
+    Long groupMemberId;
 
     @Column(name = "status")
     String status;

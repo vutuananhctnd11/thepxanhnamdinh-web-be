@@ -1,14 +1,16 @@
 package com.graduate.be_txnd_fanzone.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "user")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseModel {
@@ -42,6 +44,7 @@ public class User extends BaseModel {
     @Column(name = "phone_number")
     String phoneNumber;
 
-    @Column(name = "role", nullable = false)
-    String role;
+    @ManyToOne
+    @JoinColumn(name = "role")
+    Role role;
 }

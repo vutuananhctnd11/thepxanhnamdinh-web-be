@@ -14,7 +14,7 @@ public class Comment extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id", nullable = false)
-    String commentId;
+    Long commentId;
 
     @Column(name = "content")
     String content;

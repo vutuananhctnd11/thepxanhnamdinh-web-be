@@ -15,7 +15,7 @@ public class NewsFeed extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "news_feed_id", nullable = false)
-    String newsFeedId;
+    Long newsFeedId;
 
     @Column(name = "content")
     String content;
