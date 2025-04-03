@@ -26,7 +26,7 @@ public class BaseModel {
 
     @Column(name = "create_by")
     @CreatedBy
-    Long createBy;
+    String createBy;
 
     @Column(name = "update_date")
     @LastModifiedDate
@@ -34,9 +34,9 @@ public class BaseModel {
 
     @Column(name = "update_by")
     @LastModifiedBy
-    Long updateBy;
+    String updateBy;
 
-    @Column(name = "delete_flag")
+    @Column(name = "delete_flag", columnDefinition = "boolean")
     Boolean deleteFlag = false;
 
 }

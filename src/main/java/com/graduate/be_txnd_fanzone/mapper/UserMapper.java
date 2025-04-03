@@ -2,16 +2,28 @@ package com.graduate.be_txnd_fanzone.mapper;
 
 import com.graduate.be_txnd_fanzone.dto.user.CreateUserRequest;
 import com.graduate.be_txnd_fanzone.dto.user.CreateUserResponse;
+import com.graduate.be_txnd_fanzone.dto.user.UpdateUserRequest;
+import com.graduate.be_txnd_fanzone.dto.user.UpdateUserResponse;
 import com.graduate.be_txnd_fanzone.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+import java.lang.invoke.MethodHandleProxies;
+
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UserMapper {
 
     User toUser(CreateUserRequest request);
 
+    @Mapping(target = "username", ignore = true)
+    User updateUser(@MappingTarget User user, UpdateUserRequest request);
+
     @Mapping(target = "fullName", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
     @Mapping(target = "role", ignore = true)
     CreateUserResponse toCreateUserResponse (User user);
+
+    @Mapping(target = "role", ignore = true)
+    UpdateUserResponse toUpdateUserResponse (User user);
 }

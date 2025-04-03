@@ -10,9 +10,6 @@ import com.graduate.be_txnd_fanzone.util.JwtUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +23,7 @@ public class AuthenticationService {
     PasswordEncoder passwordEncoder;
 
     public LoginResponse authenticate(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() ->
+        User user = userRepository.findByUsernameAndDeleteFlagIsFalse(request.getUsername()).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 

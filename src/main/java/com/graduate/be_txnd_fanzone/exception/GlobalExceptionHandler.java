@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException exception) {
-        ApiResponse<Object> apiResponse = new ApiResponse<>("error","Runtime Exception");
+        ApiResponse<Object> apiResponse = new ApiResponse<>("error", exception.getMessage());
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
