@@ -35,4 +35,8 @@ public class BaseModel {
     @Column(name = "update_by")
     @LastModifiedBy
     Long updateBy;
+
+    @Column(name = "delete_flag")
+    Boolean deleteFlag = false;
+
 }
