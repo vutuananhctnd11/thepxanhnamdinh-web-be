@@ -7,6 +7,9 @@ import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +25,7 @@ public class AuthenticationService {
     JwtUtil jwtUtil;
     PasswordEncoder passwordEncoder;
 
-    public LoginResponse authenticate(LoginRequest request) {
+    public LoginResponse authenticate(LoginRequest request, HttpServletResponse response) {
         User user = userRepository.findByUsernameAndDeleteFlagIsFalse(request.getUsername()).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -31,8 +34,40 @@ public class AuthenticationService {
             throw new CustomException(ErrorCode.UNAUTHENTICATED);
         }
 
-        String token = jwtUtil.createJwtToken(user);
-        return LoginResponse.builder().token(token).authenticated(true).build();
+        String accesstoken = jwtUtil.createJwtToken(user, false);
+        String refreshToken = jwtUtil.createJwtToken(user, true);
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(cookie);
+
+        return LoginResponse.builder().token(accesstoken).authenticated(true).build();
+    }
+
+    public LoginResponse refreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        String refreshToken = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refreshToken")) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (refreshToken == null || jwtUtil.isExpiredToken(refreshToken)) {
+            throw new CustomException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        String username = jwtUtil.getUsernameFromJwtToken(refreshToken);
+        User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(username).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String accessToken = jwtUtil.createJwtToken(userLogin, false);
+
+        return LoginResponse.builder().token(accessToken).authenticated(true).build();
     }
 
 }

@@ -16,19 +16,19 @@ public class JwtUtil {
     @Value("${jwt.signKey}")
     private String signKey;
 
-    @Value("${iwt.expirationTime}")
-    private int expirationTime;
+    @Value("${jwt.accessToken.expirationTime}")
+    private int accessTokenExpirationTime;
 
-    public String createJwtToken(User user) {
+    @Value("${jwt.refreshToken.expirationTime}")
+    private int refreshTokenExpirationTime;
+
+    public String createJwtToken(User user, boolean isRefreshToken) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("email", user.getEmailAddress())
                 .setIssuer("TuanAnhDev2025")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .setExpiration(new Date(System.currentTimeMillis() + (isRefreshToken ? refreshTokenExpirationTime : accessTokenExpirationTime)))
                 .signWith(SignatureAlgorithm.HS512, signKey)
                 .compact();
-
     }
 
     public String getUsernameFromJwtToken(String token) {
@@ -47,5 +47,14 @@ public class JwtUtil {
                 .getBody();
 
         return claims.getSubject().equals(userDetails.getUsername()) && !claims.getExpiration().before(new Date());
+    }
+
+    public boolean isExpiredToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(signKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration().before(new Date());
     }
 }
