@@ -44,6 +44,9 @@ public class User extends BaseModel {
     @Column(name = "phone_number")
     String phoneNumber;
 
+    @Column(name = "avatar")
+    String avatar;
+
     @ManyToOne
     @JoinColumn(name = "role")
     Role role;

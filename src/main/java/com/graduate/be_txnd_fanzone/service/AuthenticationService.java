@@ -31,10 +31,10 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            throw new CustomException(ErrorCode.UNAUTHENTICATED);
+            throw new CustomException(ErrorCode.PASSWORD_INVALID);
         }
 
-        String accesstoken = jwtUtil.createJwtToken(user, false);
+        String accessToken = jwtUtil.createJwtToken(user, false);
         String refreshToken = jwtUtil.createJwtToken(user, true);
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
@@ -42,7 +42,7 @@ public class AuthenticationService {
         cookie.setMaxAge(60 * 60 * 24 * 7);
         response.addCookie(cookie);
 
-        return LoginResponse.builder().token(accesstoken).authenticated(true).build();
+        return LoginResponse.builder().token(accessToken).authenticated(true).build();
     }
 
     public LoginResponse refreshToken(HttpServletRequest request) {
