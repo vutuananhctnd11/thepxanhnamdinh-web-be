@@ -32,7 +32,7 @@ public class SecurityConfig {
     CustomUserDetailsService userDetailsService;
 
     @NonFinal
-    static String[] publicEndPoint = {"/users", "/auth/login"};
+    static String[] publicEndPoint = {"/users", "/auth/login", "auth/refresh"};
 
 
     @Bean

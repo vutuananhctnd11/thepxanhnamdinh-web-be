@@ -1,9 +1,6 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserResponse;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserResponse;
+import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -26,4 +23,6 @@ public interface UserMapper {
 
     @Mapping(target = "role", ignore = true)
     UpdateUserResponse toUpdateUserResponse (User user);
+
+    UserInfoResponse toUserInfoResponse (User user);
 }

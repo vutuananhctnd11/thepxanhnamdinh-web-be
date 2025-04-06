@@ -1,10 +1,8 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserResponse;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserResponse;
+import com.graduate.be_txnd_fanzone.dto.user.*;
+import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +35,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<?>> softDeleteUser(@PathVariable Long userId) {
         userService.softDeleteUser(userId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserLoginInfo () {
+        ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK); 
     }
 }

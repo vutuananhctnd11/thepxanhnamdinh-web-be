@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     UNAUTHORIZED ("Bạn không có quyền truy cập", HttpStatus.UNAUTHORIZED),
-    UNAUTHENTICATED ("Xác thực thất bại, vui lòng thử lại!", HttpStatus.BAD_REQUEST),
+    UNAUTHENTICATED ("Xác thực thất bại, vui lòng thử lại!", HttpStatus.UNAUTHORIZED),
     ROLE_NOT_FOUND ("Không tìm thấy quyền này!", HttpStatus.BAD_REQUEST),
-    USER_EXISTED ("Đã tồn tại người dùng trong hệ thống!", HttpStatus.BAD_REQUEST),
-    USER_NOT_FOUND ("Không tồn tại người dùng trong hệ thống!", HttpStatus.BAD_REQUEST),
+    USER_EXISTED ("Đã tồn tại người dùng (tên đăng nhập) trong hệ thống!", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND ("Không tồn tại người dùng (tên đăng nhập) trong hệ thống!", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID ("Sai mật khẩu, vui lòng thử lại!", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED ("Đã tồn tại email trong hệ thống!", HttpStatus.BAD_REQUEST),
     ;

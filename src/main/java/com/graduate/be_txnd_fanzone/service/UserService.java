@@ -1,9 +1,6 @@
 package com.graduate.be_txnd_fanzone.service;
 
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.CreateUserResponse;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserRequest;
-import com.graduate.be_txnd_fanzone.dto.user.UpdateUserResponse;
+import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.enums.RoleEnums;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -72,6 +69,13 @@ public class UserService {
                 new CustomException(ErrorCode.USER_NOT_FOUND));
         user.setDeleteFlag(true);
         userRepository.save(user);
+    }
+
+    public UserInfoResponse getUserLoginInfo() {
+        String usernameLogin = SecurityContextHolder.getContext().getAuthentication().getName();
+        User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(usernameLogin).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toUserInfoResponse(userLogin);
     }
 
 
