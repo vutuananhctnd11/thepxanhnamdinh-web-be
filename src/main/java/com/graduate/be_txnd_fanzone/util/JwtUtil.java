@@ -22,11 +22,22 @@ public class JwtUtil {
     @Value("${jwt.refreshToken.expirationTime}")
     private int refreshTokenExpirationTime;
 
-    public String createJwtToken(User user, boolean isRefreshToken) {
+    public String createAccessToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuer("TuanAnhDev2025")
-                .setExpiration(new Date(System.currentTimeMillis() + (isRefreshToken ? refreshTokenExpirationTime : accessTokenExpirationTime)))
+                .claim("role","ROLE_" + user.getRole().getRoleName())
+                .setExpiration(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + (accessTokenExpirationTime)))
+                .signWith(SignatureAlgorithm.HS512, signKey)
+                .compact();
+    }
+
+    public String createRefreshToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .setIssuer("TuanAnhDev2025")
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
                 .signWith(SignatureAlgorithm.HS512, signKey)
                 .compact();
     }

@@ -33,6 +33,15 @@ public class Coach extends BaseModel {
     @Column(name = "nationality", nullable = false)
     String nationality;
 
+    @Column(name = "address")
+    String address;
+
     @Column(name = "description")
     String description;
+
+    @Column(name = "image")
+    String image;
+
+    @Column(name = "position", columnDefinition = "TEXT")
+    String position;
 }

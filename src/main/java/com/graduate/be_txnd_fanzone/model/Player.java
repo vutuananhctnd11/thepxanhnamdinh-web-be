@@ -24,6 +24,9 @@ public class Player extends BaseModel {
     @Column(name = "last_name",nullable = false)
     String lastName;
 
+    @Column(name = "name_in_shirt")
+    String nameInShirt;
+
     @Column(name = "shirt_number")
     Integer shirtNumber;
 
@@ -53,5 +56,11 @@ public class Player extends BaseModel {
 
     @Column(name = "avatar_image", nullable = false)
     String avatarImage;
+
+    @Column(name = "full_body_image")
+    String fullBodyImage;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    String description;
 
 }

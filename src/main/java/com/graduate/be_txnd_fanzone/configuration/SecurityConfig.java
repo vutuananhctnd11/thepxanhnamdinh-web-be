@@ -32,7 +32,8 @@ public class SecurityConfig {
     CustomUserDetailsService userDetailsService;
 
     @NonFinal
-    static String[] publicEndPoint = {"/users", "/auth/login", "auth/refresh"};
+    static String[] postPublicEndPoint = {"/users", "/auth/login", "auth/refresh", "/cloudinary"};
+    static String[] getPublicEndPoint = {"/players/{playerId}", "/players/squad", "/coaches/**"};
 
 
     @Bean
@@ -42,7 +43,8 @@ public class SecurityConfig {
                 .csrf(crsf -> crsf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST ,publicEndPoint).permitAll()
+                        .requestMatchers(HttpMethod.POST ,postPublicEndPoint).permitAll()
+                        .requestMatchers(HttpMethod.GET ,getPublicEndPoint).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

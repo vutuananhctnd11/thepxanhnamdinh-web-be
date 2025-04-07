@@ -34,8 +34,8 @@ public class AuthenticationService {
             throw new CustomException(ErrorCode.PASSWORD_INVALID);
         }
 
-        String accessToken = jwtUtil.createJwtToken(user, false);
-        String refreshToken = jwtUtil.createJwtToken(user, true);
+        String accessToken = jwtUtil.createAccessToken(user);
+        String refreshToken = jwtUtil.createRefreshToken(user);
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
@@ -65,9 +65,17 @@ public class AuthenticationService {
         User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(username).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String accessToken = jwtUtil.createJwtToken(userLogin, false);
+        String accessToken = jwtUtil.createAccessToken(userLogin);
 
         return LoginResponse.builder().token(accessToken).authenticated(true).build();
+    }
+
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
 }

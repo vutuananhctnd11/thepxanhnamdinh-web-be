@@ -31,7 +31,7 @@ public class UserController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PatchMapping("{userId}")
+    @PatchMapping("/{userId}")
     public ResponseEntity<ApiResponse<?>> softDeleteUser(@PathVariable Long userId) {
         userService.softDeleteUser(userId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
