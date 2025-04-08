@@ -62,7 +62,7 @@ public class PlayerService {
     }
 
     private List<PlayerInSquadResponse> randomPlayersByPosition(String position,int limit) {
-        List<Player> players = playerRepository.findAllByPositionContainsIgnoreCase(position)
+        List<Player> players = playerRepository.findAllByPositionContainsIgnoreCaseAndDeleteFlagIsFalse(position)
                 .orElseThrow(() -> new CustomException(ErrorCode.PLAYER_NOT_FOUND));
         Collections.shuffle(players);
         List<PlayerInSquadResponse> playerInSquadResponses = players.stream()

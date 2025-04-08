@@ -63,4 +63,8 @@ public class Player extends BaseModel {
     @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
+    @ManyToOne
+    @JoinColumn(name = "club_id")
+    Club club;
+
 }

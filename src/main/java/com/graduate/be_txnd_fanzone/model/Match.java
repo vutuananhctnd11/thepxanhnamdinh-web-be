@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -36,7 +38,13 @@ public class Match extends BaseModel {
     @Column(name = "status")
     String status;
 
-    //liên kết many to many với club
+    @ManyToOne
+    @JoinColumn(name = "home_club_id")
+    Club homeClub;
+
+    @ManyToOne
+    @JoinColumn(name = "away_club_id")
+    Club awayClub;
 
 
 }

@@ -5,6 +5,10 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Data
 @Entity
 @Table(name = "club")
@@ -27,5 +31,17 @@ public class Club extends BaseModel {
 
     @Column(name = "logo", nullable = false)
     String logo;
+
+    @Column(name = "allow_delete")
+    Boolean allowDelete = true;
+
+    @OneToMany(mappedBy = "club")
+    List<Player> players;
+
+    @OneToMany(mappedBy = "homeClub")
+    List<Match> homeMatches;
+
+    @OneToMany(mappedBy = "awayClub")
+    List<Match> awayMatches;
 
 }

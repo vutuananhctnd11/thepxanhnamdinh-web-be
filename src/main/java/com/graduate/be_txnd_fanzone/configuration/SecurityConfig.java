@@ -33,7 +33,7 @@ public class SecurityConfig {
 
     @NonFinal
     static String[] postPublicEndPoint = {"/users", "/auth/login", "auth/refresh", "/cloudinary"};
-    static String[] getPublicEndPoint = {"/players/{playerId}", "/players/squad", "/coaches/**"};
+    static String[] getPublicEndPoint = {"/players/{playerId}", "/players/squad", "/coaches/**", "/matches/**"};
 
 
     @Bean
