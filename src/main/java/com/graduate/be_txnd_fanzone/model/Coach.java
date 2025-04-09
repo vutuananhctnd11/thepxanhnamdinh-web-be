@@ -36,12 +36,12 @@ public class Coach extends BaseModel {
     @Column(name = "address")
     String address;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
     @Column(name = "image")
     String image;
 
-    @Column(name = "position", columnDefinition = "TEXT")
+    @Column(name = "position")
     String position;
 }

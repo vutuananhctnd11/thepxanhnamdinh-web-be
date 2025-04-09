@@ -6,26 +6,40 @@ import com.graduate.be_txnd_fanzone.dto.player.SquadResponse;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.PlayerMapper;
+import com.graduate.be_txnd_fanzone.model.Club;
 import com.graduate.be_txnd_fanzone.model.Player;
+import com.graduate.be_txnd_fanzone.repository.ClubRepository;
 import com.graduate.be_txnd_fanzone.repository.PlayerRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import lombok.experimental.NonFinal;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerService {
 
     PlayerRepository playerRepository;
-
     PlayerMapper playerMapper;
+    ClubRepository clubRepository;
+
+    @NonFinal
+    Club myClub;
+
+    @NonFinal
+    Long myClubId;
+
+    @PostConstruct
+    public void init() {
+        myClub = clubRepository.findByAllowDeleteIsFalse()
+                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        myClubId = myClub.getClubId();
+    }
 
     public SquadResponse getSquad() {
         SquadResponse squad = new SquadResponse();
@@ -47,7 +61,7 @@ public class PlayerService {
         squadPlayerId.addAll(listSquadPlayerId(randomPlayers));
         squad.setGoalkeeperPlayer(randomPlayers);
 
-        List<PlayerInSquadResponse> substitutePlayers = new ArrayList<>(playerRepository.findAll()
+        List<PlayerInSquadResponse> substitutePlayers = new ArrayList<>(playerRepository.findAllByClub_ClubIdAndDeleteFlagIsFalse(myClubId)
                 .stream().map(playerMapper::toPlayerInSquadResponse).toList());
         substitutePlayers.removeIf(player -> squadPlayerId.contains(player.getPlayerId()));
         squad.setSubstitutePlayers(substitutePlayers);
@@ -56,14 +70,14 @@ public class PlayerService {
     }
 
     public PlayerInfoResponse getPlayerInfo(Long playerId) {
-        Player player = playerRepository.findById(playerId).orElseThrow(() ->
+        Player player = playerRepository.findByPlayerIdAndDeleteFlagIsFalse(playerId).orElseThrow(() ->
                 new CustomException(ErrorCode.PLAYER_NOT_FOUND));
         return playerMapper.toPlayerInfoResponse(player);
     }
 
     private List<PlayerInSquadResponse> randomPlayersByPosition(String position,int limit) {
-        List<Player> players = playerRepository.findAllByPositionContainsIgnoreCaseAndDeleteFlagIsFalse(position)
-                .orElseThrow(() -> new CustomException(ErrorCode.PLAYER_NOT_FOUND));
+        List<Player> players = playerRepository
+                .findAllByPositionContainsIgnoreCaseAndClub_ClubIdAndDeleteFlagIsFalse(position, myClubId);
         Collections.shuffle(players);
         List<PlayerInSquadResponse> playerInSquadResponses = players.stream()
                 .map(playerMapper::toPlayerInSquadResponse)
