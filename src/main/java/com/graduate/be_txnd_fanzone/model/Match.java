@@ -38,6 +38,9 @@ public class Match extends BaseModel {
     @Column(name = "status")
     String status;
 
+    @Column(name = "sell_ticket")
+    Boolean sellTicket;
+
     @ManyToOne
     @JoinColumn(name = "home_club_id")
     Club homeClub;

@@ -18,10 +18,10 @@ public class Player extends BaseModel {
     @Column(name = "player_id", nullable = false)
     Long playerId;
 
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name")
     String firstName;
 
-    @Column(name = "last_name",nullable = false)
+    @Column(name = "last_name")
     String lastName;
 
     @Column(name = "name_in_shirt")
@@ -42,10 +42,10 @@ public class Player extends BaseModel {
     @Column(name = "weight")
     Integer weight;
 
-    @Column(name = "nationality", nullable = false)
+    @Column(name = "nationality")
     String nationality;
 
-    @Column(name = "position", nullable = false)
+    @Column(name = "position")
     String position;
 
     @Column(name = "goal")
