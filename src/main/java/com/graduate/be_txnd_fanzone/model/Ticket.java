@@ -12,9 +12,9 @@ import lombok.experimental.FieldDefaults;
 public class Ticket extends BaseModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_id", nullable = false)
-    String ticketId;
+    Long ticketId;
 
     @Column(name = "price", nullable = false)
     Integer price;
@@ -22,8 +22,19 @@ public class Ticket extends BaseModel {
     @Column(name = "stand_name", nullable = false)
     String standName;
 
+    @Column(name = "position")
+    String position;
+
+    @Column(name = "note")
+    String note;
+
+    @Column(name = "quantity")
+    Integer quantity;
+
     @Column(name = "status", nullable = false)
     String status;
 
-    //Liên kết many to one với match
+    @ManyToOne
+    @JoinColumn(name = "match_id")
+    Match match;
 }
