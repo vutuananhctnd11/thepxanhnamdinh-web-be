@@ -4,9 +4,8 @@ import com.graduate.be_txnd_fanzone.dto.player.PlayerInSquadResponse;
 import com.graduate.be_txnd_fanzone.dto.player.PlayerInfoResponse;
 import com.graduate.be_txnd_fanzone.model.Player;
 import org.mapstruct.Mapper;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface PlayerMapper {
 
     PlayerInSquadResponse toPlayerInSquadResponse (Player player);

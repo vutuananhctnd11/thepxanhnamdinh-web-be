@@ -5,9 +5,8 @@ import com.graduate.be_txnd_fanzone.dto.match.MatchSellTicketResponse;
 import com.graduate.be_txnd_fanzone.model.Match;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface MatchMapper {
 
     @Mapping(source = "homeClub.clubName", target = "homeName")

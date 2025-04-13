@@ -10,7 +10,6 @@ public class TicketTypeResponse {
 
     Long ticketId;
     Integer price;
-    String standName;
     String position;
     String note;
 }
