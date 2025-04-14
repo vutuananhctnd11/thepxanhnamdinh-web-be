@@ -32,8 +32,8 @@ public class SecurityConfig {
     CustomUserDetailsService userDetailsService;
 
     @NonFinal
-    static String[] postPublicEndPoint = {"/users", "/auth/login", "auth/refresh", "/cloudinary"};
-    static String[] getPublicEndPoint = {"/players/{playerId}", "/players/squad", "/coaches/**", "/matches/**", "/tickets/**"};
+    static String[] postPublicEndPoint = {"/users", "/auth/login", "/auth/refresh", "/cloudinary"};
+    static String[] getPublicEndPoint = {"/players/*", "/players/squad", "/coaches/**", "/matches/**"};
 
 
     @Bean

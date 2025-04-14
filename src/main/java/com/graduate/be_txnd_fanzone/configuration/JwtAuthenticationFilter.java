@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.configuration;
 
+import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.service.CustomUserDetailsService;
 import com.graduate.be_txnd_fanzone.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 
 @Component

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,8 +34,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = ServletException.class)
     ResponseEntity<ApiResponse<?>> handleServletException(ServletException exception) {
-        ApiResponse<?> apiResponse = new ApiResponse<>("error", ErrorCode.UNAUTHENTICATED.getMessage());
+        ApiResponse<?> apiResponse = new ApiResponse<>("error", exception.getMessage());
         return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
     }
-
 }
