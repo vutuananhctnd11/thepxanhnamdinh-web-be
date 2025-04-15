@@ -20,7 +20,9 @@ public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 //    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay_jsp/vnpay_return.jsp";
     public static String vnp_TmnCode = "I56KYZGK";
-    public static String secretKey = "HUY3NNLBLH7SCP6DRK48RZUPB3AF4OZT";
+    public static String vnp_Version = "2.1.0";
+    public static String vnp_Command = "pay";
+    public static String secretKey = "PUZX1TDJ1CZNFXHJLZ1DAPE7KH98FERE ";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
 //    public static String md5(String message) {
