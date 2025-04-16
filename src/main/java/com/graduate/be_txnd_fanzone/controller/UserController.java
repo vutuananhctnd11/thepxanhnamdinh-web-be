@@ -4,6 +4,7 @@ import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,5 +42,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserInfoResponse>> getUserLoginInfo () {
         ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK); 
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletResponse httpResponse) {
+        userService.forgotPassword(request.getIdentifier(), httpResponse);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 }

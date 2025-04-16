@@ -3,7 +3,6 @@ package com.graduate.be_txnd_fanzone.service;
 import com.graduate.be_txnd_fanzone.dto.ticket.TicketOfMatchResponse;
 import com.graduate.be_txnd_fanzone.dto.ticket.TicketTypeResponse;
 import com.graduate.be_txnd_fanzone.mapper.TicketMapper;
-import com.graduate.be_txnd_fanzone.model.Ticket;
 import com.graduate.be_txnd_fanzone.repository.TicketRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

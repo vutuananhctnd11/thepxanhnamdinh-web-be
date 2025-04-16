@@ -26,7 +26,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuer("TuanAnhDev2025")
-                .claim("role","ROLE_" + user.getRole().getRoleName())
+                .claim("role", "ROLE_" + user.getRole().getRoleName())
                 .setExpiration(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (accessTokenExpirationTime)))
                 .signWith(SignatureAlgorithm.HS512, signKey)
@@ -38,6 +38,17 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .setIssuer("TuanAnhDev2025")
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
+                .signWith(SignatureAlgorithm.HS512, signKey)
+                .compact();
+    }
+
+    public String createForgotPasswordToken(String email, String otp) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("otp", otp)
+                .claim("type", "OTP_RESET")
+                .setExpiration(new Date(System.currentTimeMillis() + 5 * 60 * 1000))
+                .setIssuer("TuanAnhDev2025")
                 .signWith(SignatureAlgorithm.HS512, signKey)
                 .compact();
     }

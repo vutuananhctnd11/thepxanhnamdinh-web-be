@@ -9,6 +9,10 @@ import com.graduate.be_txnd_fanzone.model.Role;
 import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.repository.RoleRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
+import com.graduate.be_txnd_fanzone.util.JwtUtil;
+import com.graduate.be_txnd_fanzone.util.OtpRandomUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,8 @@ public class UserService {
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    JwtUtil jwtUtil;
+    EmailService emailService;
 
     public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
 
@@ -76,6 +82,22 @@ public class UserService {
         User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(usernameLogin).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserInfoResponse(userLogin);
+    }
+
+    public void forgotPassword(String identifier, HttpServletResponse response) {
+        User user = userRepository.findByUsernameAndDeleteFlagIsFalse(identifier)
+                .orElseGet(() -> userRepository.findByEmailAddressAndDeleteFlagIsFalse(identifier)
+                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)));
+
+        String otp = OtpRandomUtil.generateOtp(8);
+        String token = jwtUtil.createForgotPasswordToken(user.getEmailAddress(), otp);
+        Cookie cookie = new Cookie("otpToken", token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 10);
+        response.addCookie(cookie);
+
+        emailService.sendForgotPasswordEmail(user.getEmailAddress(), user.getUsername(), otp);
     }
 
 

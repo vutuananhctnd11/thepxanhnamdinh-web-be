@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserIdAndDeleteFlagIsFalse(Long userId);
 
     Optional<User> findByUsernameAndDeleteFlagIsFalse(String username);
+
+    Optional<User> findByEmailAddressAndDeleteFlagIsFalse(String email);
 }

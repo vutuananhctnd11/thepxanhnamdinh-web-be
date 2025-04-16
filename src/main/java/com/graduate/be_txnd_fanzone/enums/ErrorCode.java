@@ -21,6 +21,7 @@ public enum ErrorCode {
     COACH_NOT_FOUND ("Không tìm thấy huấn luyện viên phù hợp!", HttpStatus.NOT_FOUND),
     MATCH_NOT_FOUND ("Không tìm thấy trận đấu nào!", HttpStatus.NOT_FOUND),
     CLUB_NOT_FOUND ("Không tìm thấy CLB!", HttpStatus.NOT_FOUND),
+    CAN_NOT_SEND_EMAIL ("Không thể gửi được email!", HttpStatus.BAD_REQUEST),
     ;
     private ErrorCode (String message, HttpStatus httpStatus) {
         this.message = message;
