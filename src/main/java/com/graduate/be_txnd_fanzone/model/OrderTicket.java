@@ -2,8 +2,12 @@ package com.graduate.be_txnd_fanzone.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -16,12 +20,14 @@ public class OrderTicket extends BaseModel {
     @Column(name = "order_ticket_id", nullable = false)
     Long orderTicketId;
 
-    @Column(name = "full_name", nullable = false)
-    String fullName;
+    @Column(name = "status", nullable = false)
+    String status;
 
-    @Column(name = "email", nullable = false)
-    String email;
+    @OneToMany(mappedBy = "orderTicket")
+    List<OrderTicketDetail> orderTicketDetails;
 
-    @Column(name = "phone_number", nullable = false)
-    String phoneNumber;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
+
 }

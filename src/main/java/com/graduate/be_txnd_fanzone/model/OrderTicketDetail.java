@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "order_ticket_detail")
@@ -12,17 +14,16 @@ import lombok.experimental.FieldDefaults;
 public class OrderTicketDetail extends BaseModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "order_ticket_detail_id", nullable = false)
-    Long orderTicketDetailId;
+    String orderTicketDetailId;
 
-    @Column(name = "total_ticket", nullable = false)
-    Integer totalTicket;
+    @ManyToOne
+    @JoinColumn(name = "order_ticket_id")
+    OrderTicket orderTicket;
 
-    @Column(name = "total_price", nullable = false)
-    Integer totalPrice;
-
-    @Column(name = "status", nullable = false)
-    String status;
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    Ticket ticket;
 
 }

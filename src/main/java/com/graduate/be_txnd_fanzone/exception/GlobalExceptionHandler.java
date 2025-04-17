@@ -22,7 +22,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = CustomException.class)
     ResponseEntity<ApiResponse<Object>> handleCustomException(CustomException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse<Object> apiResponse = new ApiResponse<>("error", errorCode.getMessage());
+        String formatMessage = exception.getMessage();
+        ApiResponse<Object> apiResponse = new ApiResponse<>("error", formatMessage);
         return new ResponseEntity<>(apiResponse, errorCode.getHttpStatus());
     }
 

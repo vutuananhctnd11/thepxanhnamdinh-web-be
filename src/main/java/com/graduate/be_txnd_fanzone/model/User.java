@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Entity
@@ -50,4 +51,7 @@ public class User extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "role")
     Role role;
+
+    @OneToMany(mappedBy = "user")
+    List<OrderTicket> orderTickets;
 }

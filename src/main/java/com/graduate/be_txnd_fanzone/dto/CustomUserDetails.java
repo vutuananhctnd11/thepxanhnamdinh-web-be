@@ -16,19 +16,22 @@ import java.util.Collections;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomUserDetails implements UserDetails {
+    Long userId;
     String username;
     String password;
     String fullName;
     GrantedAuthority authority;
 
     public CustomUserDetails(User user) {
+        this.userId = user.getUserId();
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.fullName = user.getFirstName() + " " + user.getLastName();
         this.authority = new SimpleGrantedAuthority("ROLE_"+user.getRole().getRoleName());
     }
 
-    public CustomUserDetails(String username, String password, String fullName, GrantedAuthority authority) {
+    public CustomUserDetails(Long userId, String username, String password, String fullName, GrantedAuthority authority) {
+        this.userId = userId;
         this.username = username;
         this.password = password;
         this.fullName = fullName;

@@ -20,13 +20,19 @@ public enum ErrorCode {
     PLAYER_NOT_FOUND ("Không tìm thấy cầu thủ phù hợp!", HttpStatus.NOT_FOUND),
     COACH_NOT_FOUND ("Không tìm thấy huấn luyện viên phù hợp!", HttpStatus.NOT_FOUND),
     MATCH_NOT_FOUND ("Không tìm thấy trận đấu nào!", HttpStatus.NOT_FOUND),
+    TICKET_NOT_FOUND ("Không tìm thấy vé!", HttpStatus.NOT_FOUND),
     CLUB_NOT_FOUND ("Không tìm thấy CLB!", HttpStatus.NOT_FOUND),
     CAN_NOT_SEND_EMAIL ("Không thể gửi được email!", HttpStatus.BAD_REQUEST),
+    NOT_ENOUGH_TICKET ("Loại vé khán đài %s chỉ còn lại %d vé!", HttpStatus.BAD_REQUEST),
     ;
-    private ErrorCode (String message, HttpStatus httpStatus) {
+    ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;
         this.httpStatus = httpStatus;
     }
-    String message;
-    HttpStatus httpStatus;
+    final String message;
+    final HttpStatus httpStatus;
+
+    public String format(Object... args) {
+        return String.format(this.message, args);
+    }
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -48,5 +49,12 @@ public class UserController {
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletResponse httpResponse) {
         userService.forgotPassword(request.getIdentifier(), httpResponse);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/me")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getAdminLoginInfo () {
+        ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

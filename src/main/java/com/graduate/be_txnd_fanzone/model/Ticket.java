@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "ticket")
@@ -17,7 +19,7 @@ public class Ticket extends BaseModel {
     Long ticketId;
 
     @Column(name = "price", nullable = false)
-    Integer price;
+    Long price;
 
     @Column(name = "stand_name", nullable = false)
     String standName;
@@ -37,4 +39,7 @@ public class Ticket extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "match_id")
     Match match;
+
+    @OneToMany(mappedBy = "ticket")
+    List<OrderTicketDetail> orderTicketDetails;
 }
