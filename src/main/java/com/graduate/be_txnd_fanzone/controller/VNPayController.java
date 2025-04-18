@@ -10,8 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,12 +27,13 @@ public class VNPayController {
     VnpayService vnPayService;
 
     @GetMapping("/payment-info")
-    public ResponseEntity<?> handleVNPayReturn(HttpServletRequest request) {
-        String status = vnPayService.getPaymentInfo(request);
-        if ( "00".equals(status)) {
-            return new ResponseEntity<>(new ApiResponse<>("success","Thành công" ), HttpStatus.OK);
+    public RedirectView handleVNPayReturn(@RequestParam(value = "vnp_ResponseCode") String status) {
+        String redirectUrl;
+        if ("00".equals(status)) {
+            redirectUrl = "http://localhost:5173/payment-status?success=true";
         } else {
-            return new ResponseEntity<>(new ApiResponse<>("error","Thất bại" ), HttpStatus.BAD_REQUEST);
+            redirectUrl = "http://localhost:5173/payment-status?success=false";
         }
+        return new RedirectView(redirectUrl);
     }
 }

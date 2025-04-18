@@ -80,23 +80,4 @@ public class VnpayService {
 
         return VNPayConfig.vnp_PayUrl + "?" + queryUrl;
     }
-
-    public String getPaymentInfo(HttpServletRequest request) {
-        Map<String, String> vnpParams = new HashMap<>();
-        Map<String, String[]> requestParams = request.getParameterMap();
-        for (Map.Entry<String, String[]> entry : requestParams.entrySet()) {
-            if (!entry.getKey().equals("vnp_SecureHash")) {
-                vnpParams.put(entry.getKey(), entry.getValue()[0]);
-            }
-        }
-
-        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-        String signValue = VNPayConfig.hashAllFields(vnpParams);
-
-        if (signValue.equals(vnp_SecureHash)) {
-            return vnpParams.get("vnp_ResponseCode");
-        } else {
-            return null;
-        }
-    }
 }
