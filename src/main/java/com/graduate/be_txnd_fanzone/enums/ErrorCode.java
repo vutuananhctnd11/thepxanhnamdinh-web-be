@@ -24,6 +24,8 @@ public enum ErrorCode {
     CLUB_NOT_FOUND ("Không tìm thấy CLB!", HttpStatus.NOT_FOUND),
     CAN_NOT_SEND_EMAIL ("Không thể gửi được email!", HttpStatus.BAD_REQUEST),
     NOT_ENOUGH_TICKET ("Loại vé khán đài %s chỉ còn lại %d vé!", HttpStatus.BAD_REQUEST),
+    POST_NOT_FOUND("Không tìm thấy bài viết phù hợp!", HttpStatus.NOT_FOUND),
+    MEDIA_NOT_FOUND("Không tìm thấy ảnh/video phù hợp!", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

@@ -54,4 +54,7 @@ public class User extends BaseModel {
 
     @OneToMany(mappedBy = "user")
     List<OrderTicket> orderTickets;
+
+    @OneToMany(mappedBy = "user")
+    List<Post> posts;
 }
