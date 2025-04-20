@@ -27,10 +27,10 @@ public class Post extends BaseModel {
     @Column(name = "status")
     Byte status;
 
-    @Column(name = "report_flag")
+    @Column(name = "report_flag", columnDefinition = "boolean")
     Boolean reportFlag;
 
-    @Column(name = "censor_flag")
+    @Column(name = "censor_flag", columnDefinition = "boolean")
     Boolean censorFlag;
 
     @OneToMany(mappedBy = "post")
@@ -39,4 +39,8 @@ public class Post extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    Group group;
 }

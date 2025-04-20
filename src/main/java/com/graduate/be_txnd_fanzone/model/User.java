@@ -57,4 +57,7 @@ public class User extends BaseModel {
 
     @OneToMany(mappedBy = "user")
     List<Post> posts;
+
+    @OneToMany(mappedBy = "user")
+    List<GroupMember> groupMembers;
 }

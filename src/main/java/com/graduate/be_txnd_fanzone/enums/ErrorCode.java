@@ -26,6 +26,9 @@ public enum ErrorCode {
     NOT_ENOUGH_TICKET ("Loại vé khán đài %s chỉ còn lại %d vé!", HttpStatus.BAD_REQUEST),
     POST_NOT_FOUND("Không tìm thấy bài viết phù hợp!", HttpStatus.NOT_FOUND),
     MEDIA_NOT_FOUND("Không tìm thấy ảnh/video phù hợp!", HttpStatus.NOT_FOUND),
+    GROUP_NOT_FOUND("Không tìm thấy nhóm phù hợp!", HttpStatus.NOT_FOUND),
+    GROUP_MEMBER_NOT_FOUND("Không tìm thấy thành viên trong nhóm!", HttpStatus.NOT_FOUND),
+    NO_PERMISSION("Bạn không có quyền thực hiện hành động này!", HttpStatus.UNAUTHORIZED),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

@@ -5,20 +5,28 @@ import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.MediaMapper;
 import com.graduate.be_txnd_fanzone.mapper.PostMapper;
+import com.graduate.be_txnd_fanzone.model.Group;
 import com.graduate.be_txnd_fanzone.model.Media;
 import com.graduate.be_txnd_fanzone.model.Post;
 import com.graduate.be_txnd_fanzone.model.User;
+import com.graduate.be_txnd_fanzone.repository.GroupMemberRepository;
 import com.graduate.be_txnd_fanzone.repository.MediaRepository;
 import com.graduate.be_txnd_fanzone.repository.PostRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
+import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.ocpsoft.prettytime.PrettyTime;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,8 +37,10 @@ public class PostService {
     PostMapper postMapper;
     MediaMapper mediaMapper;
     PostRepository postRepository;
-    MediaRepository mediaRepository;
     UserRepository userRepository;
+    MediaService mediaService;
+    GroupMemberRepository groupMemberRepository;
+    SecurityUtil securityUtil;
 
     @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
@@ -45,9 +55,9 @@ public class PostService {
 
         //create list media
         List<Media> medias = request.getMedias().stream().map(createMediaRequest -> {
-            Media media = mediaMapper.toMedia(createMediaRequest);
+            Media media = mediaService.createMedia(createMediaRequest);
             media.setPost(post);
-            return mediaRepository.save(media);
+            return media;
         }).collect(Collectors.toList());
 
         //set list media for news feed
@@ -63,47 +73,87 @@ public class PostService {
         Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        List<Media> mediasUpdate = request.getMedias().stream().map(updateMedia -> {
-            Media media = mediaRepository.findById(updateMedia.getMediaId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.MEDIA_NOT_FOUND));
-            media = mediaMapper.updateMedia(updateMedia, media);
-             return mediaRepository.save(media);
-        }).toList();
+        //update list media
+        List<Media> mediasUpdate = request.getMedias().stream().map(mediaService::updateMedia).toList();
+
+        //update post
         postUpdate = postMapper.updatePost(request, postUpdate);
         postUpdate.setMedias(mediasUpdate);
         postRepository.save(postUpdate);
 
+        // mapper to update response
         UpdatePostResponse response = postMapper.toUpdatePostResponse(postUpdate);
         response.setMedias(mediasUpdate.stream().map(mediaMapper::toMediaResponse).toList());
         return response;
     }
 
-    public void changeStatus(UpdatePostStatusRequest request){
-    Post newsFeedUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
-            .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-    newsFeedUpdate.setStatus(request.getStatus());
-    postRepository.save(newsFeedUpdate);
+    public void changeStatus(UpdatePostStatusRequest request) {
+        Post newsFeedUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        newsFeedUpdate.setStatus(request.getStatus());
+        postRepository.save(newsFeedUpdate);
     }
 
-    public void softDeleteOrRestorePost(Long postId, Boolean isDelete){
+    public void softDeleteOrRestorePost(Long postId, Boolean isDelete) {
         Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         post.setDeleteFlag(isDelete);
         postRepository.save(post);
     }
 
-    public void approveGroupPost(Long postId){
+    public void approveGroupPost(Long postId) {
         Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        post.setCensorFlag(true);
-        postRepository.save(post);
+        Group group = post.getGroup();
+        Long userLoginId = securityUtil.getCurrentUserId();
+
+        if (group != null) {
+            if (isAdminOrModeratorGroup(userLoginId, group.getGroupId())) {
+                post.setCensorFlag(true);
+                postRepository.save(post);
+            } else {
+                throw new CustomException(ErrorCode.NO_PERMISSION);
+            }
+        }
+
     }
 
-    public void rejectGroupPost(Long postId){
+    public void rejectGroupPost(Long postId) {
         Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        post.setDeleteFlag(true);
+        Group group = post.getGroup();
+        Long userLoginId = securityUtil.getCurrentUserId();
+
+        if (group != null) {
+            if (isAdminOrModeratorGroup(userLoginId, group.getGroupId())) {
+                postRepository.delete(post);
+            } else {
+                throw new CustomException(ErrorCode.NO_PERMISSION);
+            }
+        }
         // will process continue
     }
+
+    private boolean isAdminOrModeratorGroup(Long userId, Long groupId) {
+        boolean isAdminGroup = groupMemberRepository
+                .existsByUser_UserIdAndGroup_GroupIdAndMemberRoleAndDeleteFlagIsFalse(userId, groupId, (byte) 2);
+        boolean isModeratorGroup = groupMemberRepository
+                .existsByUser_UserIdAndGroup_GroupIdAndMemberRoleAndDeleteFlagIsFalse(userId, groupId, (byte) 1);
+        return isAdminGroup || isModeratorGroup;
+    }
+
+    public List<NewsFeedResponse> getNewsFeed(int page, int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
+        List<Post> posts = postRepository.findAllByDeleteFlagIsFalseAndCensorFlagIsTrueOrderByCreateDateDesc(pageable).getContent();
+        return posts.stream().map(post -> {
+            NewsFeedResponse newsFeedResponse = postMapper.toNewsFeedResponse(post);
+            PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+            String seenAt = prettyTime.format(post.getCreateDate());
+            newsFeedResponse.setSeenAt(seenAt);
+            newsFeedResponse.setMedias(post.getMedias().stream().map(mediaMapper::toMediaResponse).toList());
+            return newsFeedResponse;
+        }).toList();
+    }
+
 
 }

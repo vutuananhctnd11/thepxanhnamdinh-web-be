@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
@@ -53,6 +55,20 @@ public class PostController {
         postService.approveGroupPost(postId);
         return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
     }
+
+    @PatchMapping("/{postId}/reject")
+    public ResponseEntity<ApiResponse<String>> rejectGroupPost (@PathVariable Long postId) {
+        postService.rejectGroupPost(postId);
+        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+    }
+
+    @GetMapping("/news-feed")
+    public ResponseEntity<ApiResponse<List<NewsFeedResponse>>> getNewsFeed(@RequestParam int page, @RequestParam int limit) {
+        ApiResponse<List<NewsFeedResponse>> apiResponse = new ApiResponse<>(postService.getNewsFeed(page, limit));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
 
 
 

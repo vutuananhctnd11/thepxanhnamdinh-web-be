@@ -16,11 +16,21 @@ public class GroupMember extends BaseModel {
     @Column(name = "group_member_id", nullable = false)
     Long groupMemberId;
 
-    @Column(name = "status")
-    String status;
+    //0:pending, 1: approve
+    @Column(name = "approved", columnDefinition = "boolean")
+    Boolean approved;
 
+    //0: member, 1: moderator, 2:admin_group
     @Column(name = "member_role")
-    String memberRole;
+    Byte memberRole;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    Group group;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
 
 
 }
