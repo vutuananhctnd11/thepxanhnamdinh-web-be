@@ -15,7 +15,10 @@ import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +37,24 @@ public class GroupMemberService {
         Group group = groupRepository.findByGroupIdAndDeleteFlagIsFalse(request.getGroupId())
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
 
+        //check is member
+        boolean isMember = groupMemberRepository
+                .existsByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(request.getUserId(), request.getGroupId());
+        if (isMember) {
+            throw new CustomException(ErrorCode.MEMBER_EXISTED);
+        }
+
         GroupMember groupMember = new GroupMember();
         groupMember.setUser(user);
         groupMember.setGroup(group);
         groupMember.setMemberRole((byte) 0);
         groupMember.setApproved(!group.getCensorMember());
-
         groupMember = groupMemberRepository.save(groupMember);
-        return groupMemberMapper.toGroupMemberResponse(groupMember);
+
+        GroupMemberResponse response = groupMemberMapper.toGroupMemberResponse(groupMember);
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        response.setRequestAt(prettyTime.format(groupMember.getCreateDate()));
+        return response;
     }
 
     public void addAdminGroup(String username, Long groupId) {
@@ -73,6 +86,7 @@ public class GroupMemberService {
 
         if (isAdminGroup || isModeratorGroup) {
             groupMember.setApproved(true);
+            groupMemberRepository.save(groupMember);
         } else {
             throw new CustomException(ErrorCode.NO_PERMISSION);
         }

@@ -16,8 +16,16 @@ public class Friend extends BaseModel {
     @Column(name = "friend_id", nullable = false)
     Long friendId;
 
+    //0:pending, 1: accept
     @Column(name = "status", nullable = false)
-    String status;
+    Byte status;
 
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    User sender;
+
+    @ManyToOne
+    @JoinColumn(name = "receiver_id")
+    User receiver;
 
 }

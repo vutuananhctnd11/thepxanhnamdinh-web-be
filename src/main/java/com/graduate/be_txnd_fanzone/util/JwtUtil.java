@@ -27,7 +27,7 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .setIssuer("TuanAnhDev2025")
                 .claim("role", "ROLE_" + user.getRole().getRoleName())
-                .setExpiration(new Date())
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (accessTokenExpirationTime)))
                 .signWith(SignatureAlgorithm.HS512, signKey)
                 .compact();

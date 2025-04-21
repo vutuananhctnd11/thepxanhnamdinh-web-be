@@ -60,4 +60,10 @@ public class User extends BaseModel {
 
     @OneToMany(mappedBy = "user")
     List<GroupMember> groupMembers;
+
+    @OneToMany(mappedBy = "sender")
+    List<Friend> sentFriendRequests;
+
+    @OneToMany(mappedBy = "receiver")
+    List<Friend> receivedFriendRequests;
 }

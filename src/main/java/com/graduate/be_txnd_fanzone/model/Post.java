@@ -21,9 +21,11 @@ public class Post extends BaseModel {
     @Column(name = "content")
     String content;
 
+    //0: in personal page, 1: in group
     @Column(name = "type")
     Byte type;
 
+    //0: friend, 1: public
     @Column(name = "status")
     Byte status;
 

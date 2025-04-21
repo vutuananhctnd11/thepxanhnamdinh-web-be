@@ -88,10 +88,15 @@ public class PostService {
     }
 
     public void changeStatus(UpdatePostStatusRequest request) {
-        Post newsFeedUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
+        Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        newsFeedUpdate.setStatus(request.getStatus());
-        postRepository.save(newsFeedUpdate);
+        Long userLoginId = securityUtil.getCurrentUserId();
+        if (postUpdate.getUser().getUserId().equals(userLoginId)) {
+            postUpdate.setStatus(request.getStatus());
+            postRepository.save(postUpdate);
+        } else {
+            throw new CustomException(ErrorCode.NO_PERMISSION);
+        }
     }
 
     public void softDeleteOrRestorePost(Long postId, Boolean isDelete) {
@@ -114,6 +119,8 @@ public class PostService {
             } else {
                 throw new CustomException(ErrorCode.NO_PERMISSION);
             }
+        } else {
+            throw new CustomException(ErrorCode.GROUP_NOT_FOUND);
         }
 
     }
@@ -145,7 +152,19 @@ public class PostService {
     public List<NewsFeedResponse> getNewsFeed(int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         List<Post> posts = postRepository.findAllByDeleteFlagIsFalseAndCensorFlagIsTrueOrderByCreateDateDesc(pageable).getContent();
-        return posts.stream().map(post -> {
+        Long userLoginId = securityUtil.getCurrentUserId();
+
+        User userLogin = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        List<Long> joinedGroupIds = userLogin.getGroupMembers().stream()
+                .map(groupMember -> groupMember.getGroup().getGroupId()).toList();
+
+        List<Post> filteredPosts = posts.stream().filter(post -> {
+            Group group = post.getGroup();
+            return group == null || joinedGroupIds.contains(group.getGroupId());
+        }).toList();
+
+        return filteredPosts.stream().map(post -> {
             NewsFeedResponse newsFeedResponse = postMapper.toNewsFeedResponse(post);
             PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
             String seenAt = prettyTime.format(post.getCreateDate());

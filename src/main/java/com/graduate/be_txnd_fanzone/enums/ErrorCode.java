@@ -29,6 +29,9 @@ public enum ErrorCode {
     GROUP_NOT_FOUND("Không tìm thấy nhóm phù hợp!", HttpStatus.NOT_FOUND),
     GROUP_MEMBER_NOT_FOUND("Không tìm thấy thành viên trong nhóm!", HttpStatus.NOT_FOUND),
     NO_PERMISSION("Bạn không có quyền thực hiện hành động này!", HttpStatus.UNAUTHORIZED),
+    MEMBER_EXISTED("Bạn đang là thành viên của nhóm rồi!", HttpStatus.BAD_REQUEST),
+    FRIEND_REQUEST_NOT_FOUND("Không tìm thấy lời mời kết bạn nào!", HttpStatus.NOT_FOUND),
+    FRIEND_REQUEST_EXISTED("Bạn đã gửi lời kết bạn đến người này!", HttpStatus.BAD_REQUEST),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

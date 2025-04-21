@@ -12,6 +12,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     boolean existsByUser_UserIdAndGroup_GroupIdAndMemberRoleAndDeleteFlagIsFalse(Long userId,Long groupId, Byte memberRole);
 
+    boolean existsByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId,Long groupId);
+
     Optional<GroupMember> findByGroupMemberIdAndDeleteFlagIsFalse(Long groupMemberId);
 
     Long user(User user);
