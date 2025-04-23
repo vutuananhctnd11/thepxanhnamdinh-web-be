@@ -14,12 +14,17 @@ import java.util.List;
 public class NewsFeedResponse {
 
     Long postId;
+    Long userId;
+    String userFullName;
+    String avatar;
     String content;
     Byte type;
     Byte status;
     String seenAt;
     Long groupId;
     String groupName;
+    Long commentCount;
+    Long reactCount;
     List<MediaResponse> medias;
 
 }

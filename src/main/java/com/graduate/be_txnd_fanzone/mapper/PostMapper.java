@@ -19,6 +19,9 @@ public interface PostMapper {
 
     UpdatePostResponse toUpdatePostResponse(Post post);
 
+    @Mapping(source = "user.userId", target = "userId")
+    @Mapping(target = "userFullName", expression = "java(post.getUser().getFirstName() + \" \" + post.getUser().getLastName())")
+    @Mapping(source = "user.avatar", target = "avatar")
     @Mapping(source = "group.groupId", target = "groupId")
     @Mapping(source = "group.groupName", target = "groupName")
     NewsFeedResponse toNewsFeedResponse(Post post);

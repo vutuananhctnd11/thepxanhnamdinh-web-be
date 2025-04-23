@@ -3,6 +3,8 @@ package com.graduate.be_txnd_fanzone.controller;
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.friend.AddFriendRequest;
 import com.graduate.be_txnd_fanzone.dto.friend.FriendResponse;
+import com.graduate.be_txnd_fanzone.dto.friend.ListAddFriendReceivedResponse;
+import com.graduate.be_txnd_fanzone.dto.friend.ListAddFriendSentResponse;
 import com.graduate.be_txnd_fanzone.model.Friend;
 import com.graduate.be_txnd_fanzone.service.FriendService;
 import lombok.AccessLevel;
@@ -47,16 +49,18 @@ public class FriendController {
     }
 
     @GetMapping("/sender")
-    public ResponseEntity<ApiResponse<List<FriendResponse>>> getAddFriendRequestsOfSender (@RequestParam int page,
-                                                                                        @RequestParam int limit) {
-        ApiResponse<List<FriendResponse>> response = new ApiResponse<>(friendService.getAddFriendRequest(page, limit, true));
+    public ResponseEntity<ApiResponse<List<ListAddFriendSentResponse>>> getAddFriendSent (@RequestParam int page,
+                                                                                          @RequestParam int limit) {
+        ApiResponse<List<ListAddFriendSentResponse>> response =
+                new ApiResponse<>(friendService.getAddFriendSent(page, limit));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/receiver")
-    public ResponseEntity<ApiResponse<List<FriendResponse>>> getAddFriendRequestsOfReceiver (@RequestParam int page,
-                                                                                           @RequestParam int limit) {
-        ApiResponse<List<FriendResponse>> response = new ApiResponse<>(friendService.getAddFriendRequest(page, limit, false));
+    public ResponseEntity<ApiResponse<List<ListAddFriendReceivedResponse>>> getAddFriendReceived (@RequestParam int page,
+                                                                                                  @RequestParam int limit) {
+        ApiResponse<List<ListAddFriendReceivedResponse>> response =
+                new ApiResponse<>(friendService.getAddFriendReceived(page, limit));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

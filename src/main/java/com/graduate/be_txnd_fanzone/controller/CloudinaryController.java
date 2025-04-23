@@ -33,6 +33,7 @@ public class CloudinaryController {
             apiResponse.setData(url);
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new CustomException(ErrorCode.UPLOAD_FAILED);
         }
     }
@@ -42,9 +43,11 @@ public class CloudinaryController {
         ApiResponse<List<FileResponse>> apiResponse = new ApiResponse<>();
         try {
             List<FileResponse> urls = cloudinaryService.uploadListFile(files);
+            apiResponse.setStatus("success");
             apiResponse.setData(urls);
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new CustomException(ErrorCode.UPLOAD_FAILED);
         }
     }
