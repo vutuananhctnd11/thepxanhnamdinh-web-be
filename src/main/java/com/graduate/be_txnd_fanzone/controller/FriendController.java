@@ -66,9 +66,8 @@ public class FriendController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<FriendResponse>>> getListFriend (@RequestParam int page,
-                                                                            @RequestParam int limit,
-                                                                            @RequestParam Long userId) {
-        ApiResponse<List<FriendResponse>> response = new ApiResponse<>(friendService.getListFriend(page, limit, userId));
+                                                                            @RequestParam int limit) {
+        ApiResponse<List<FriendResponse>> response = new ApiResponse<>(friendService.getListFriend(page, limit));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

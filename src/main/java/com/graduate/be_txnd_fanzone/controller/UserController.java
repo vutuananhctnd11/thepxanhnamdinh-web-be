@@ -57,4 +57,10 @@ public class UserController {
         ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo (@RequestParam Long userId) {
+        ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserInfo(userId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

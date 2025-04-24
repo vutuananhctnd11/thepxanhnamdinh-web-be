@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -93,9 +94,9 @@ public class FriendService {
 
     public List<ListAddFriendSentResponse> getAddFriendSent(int page, int limit) {
         Long userLoginId = securityUtil.getCurrentUserId();
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         List<Friend> addFriends = friendRepository
-                    .findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 0, pageable).getContent();
+                .findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 0, pageable).getContent();
 
         PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
         return addFriends.stream().map(response -> {
@@ -107,7 +108,7 @@ public class FriendService {
 
     public List<ListAddFriendReceivedResponse> getAddFriendReceived(int page, int limit) {
         Long userLoginId = securityUtil.getCurrentUserId();
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         List<Friend> addFriends = friendRepository
                 .findAllByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 0, pageable).getContent();
 
@@ -119,10 +120,25 @@ public class FriendService {
         }).toList();
     }
 
-    public List<FriendResponse> getListFriend (int page, int limit, Long userId) {
-        Pageable pageable = PageRequest.of(page-1, limit);
-        List<Friend> addFriends = friendRepository
-                .findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(userId, (byte) 1, pageable).getContent();
-        return addFriends.stream().map(friendMapper::toFriendResponse).collect(Collectors.toList());
+    public List<FriendResponse> getListFriend(int page, int limit) {
+        Long userLoginId = securityUtil.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Friend> friendList = friendRepository.getListFriends(userLoginId, (byte) 1, pageable).getContent();
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+
+        return friendList.stream().map(friend -> {
+            FriendResponse friendResponse = new FriendResponse();
+            if (friend.getReceiver().getUserId().equals(userLoginId)) {
+                friendResponse.setId(friend.getSender().getUserId());
+                friendResponse.setFullName(friend.getSender().getFirstName() + " " + friend.getSender().getLastName());
+                friendResponse.setAvatar(friend.getSender().getAvatar());
+            } else {
+                friendResponse.setId(friend.getReceiver().getUserId());
+                friendResponse.setFullName(friend.getReceiver().getFirstName() + " " + friend.getReceiver().getLastName());
+                friendResponse.setAvatar(friend.getReceiver().getAvatar());
+            }
+            friendResponse.setFriendAt(prettyTime.format(friend.getUpdateDate()));
+            return friendResponse;
+        }).collect(Collectors.toList());
     }
 }

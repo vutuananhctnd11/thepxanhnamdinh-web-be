@@ -100,6 +100,14 @@ public class UserService {
         emailService.sendForgotPasswordEmail(user.getEmailAddress(), user.getUsername(), otp);
     }
 
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toUserInfoResponse(user);
+    }
+
+
+
 
 
 

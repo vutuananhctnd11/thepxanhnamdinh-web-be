@@ -8,12 +8,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FriendResponse {
 
-    Long friendId;
-    Long senderId;
-    String senderFirstName;
-    String senderLastName;
-    Long receiverId;
-    String receiverFirstName;
-    String receiverLastName;
-    String seenAt;
+    Long id;
+    String fullName;
+    String avatar;
+    String friendAt;
 }
