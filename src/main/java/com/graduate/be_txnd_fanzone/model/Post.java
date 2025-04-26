@@ -45,4 +45,7 @@ public class Post extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "group_id")
     Group group;
+
+    @OneToMany(mappedBy = "post")
+    List<Comment> comments;
 }

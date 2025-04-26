@@ -32,6 +32,7 @@ public enum ErrorCode {
     MEMBER_EXISTED("Bạn đang là thành viên của nhóm rồi!", HttpStatus.BAD_REQUEST),
     FRIEND_REQUEST_NOT_FOUND("Không tìm thấy lời mời kết bạn nào!", HttpStatus.NOT_FOUND),
     FRIEND_REQUEST_EXISTED("Bạn đã gửi lời kết bạn đến người này!", HttpStatus.BAD_REQUEST),
+    CMT_NOT_FOUND("Không tìm thấy bình luận phù hợp!", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

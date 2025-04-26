@@ -174,5 +174,11 @@ public class PostService {
         }).toList();
     }
 
+    public NewsFeedResponse getPostByPostId (Long postId) {
+        Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        return postMapper.toNewsFeedResponse(post);
+    }
+
 
 }

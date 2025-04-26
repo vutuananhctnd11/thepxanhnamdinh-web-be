@@ -120,6 +120,11 @@
             <artifactId>prettytime</artifactId>
             <version>5.0.4.Final</version>
         </dependency>
+        <!--    web socket    -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

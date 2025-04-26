@@ -66,4 +66,7 @@ public class User extends BaseModel {
 
     @OneToMany(mappedBy = "receiver")
     List<Friend> receivedFriendRequests;
+
+    @OneToMany(mappedBy = "user")
+    List<Comment> comments;
 }

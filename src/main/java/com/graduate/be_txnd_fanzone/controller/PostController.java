@@ -68,6 +68,12 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<NewsFeedResponse>> getPostByPostId(@RequestParam Long postId) {
+        ApiResponse<NewsFeedResponse> apiResponse = new ApiResponse<>(postService.getPostByPostId(postId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 
 
 

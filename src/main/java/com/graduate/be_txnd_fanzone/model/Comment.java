@@ -19,4 +19,12 @@ public class Comment extends BaseModel {
     @Column(name = "content")
     String content;
 
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    Post post;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
+
 }
