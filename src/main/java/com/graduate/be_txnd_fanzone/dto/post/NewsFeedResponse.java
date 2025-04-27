@@ -25,6 +25,7 @@ public class NewsFeedResponse {
     String groupName;
     Long commentCount;
     Long reactCount;
+    Boolean liked;
     List<MediaResponse> medias;
 
 }

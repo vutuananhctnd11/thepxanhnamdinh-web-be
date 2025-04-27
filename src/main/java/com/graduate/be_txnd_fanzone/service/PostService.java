@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.post.*;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -9,10 +10,7 @@ import com.graduate.be_txnd_fanzone.model.Group;
 import com.graduate.be_txnd_fanzone.model.Media;
 import com.graduate.be_txnd_fanzone.model.Post;
 import com.graduate.be_txnd_fanzone.model.User;
-import com.graduate.be_txnd_fanzone.repository.GroupMemberRepository;
-import com.graduate.be_txnd_fanzone.repository.MediaRepository;
-import com.graduate.be_txnd_fanzone.repository.PostRepository;
-import com.graduate.be_txnd_fanzone.repository.UserRepository;
+import com.graduate.be_txnd_fanzone.repository.*;
 import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +38,8 @@ public class PostService {
     MediaService mediaService;
     GroupMemberRepository groupMemberRepository;
     SecurityUtil securityUtil;
+    ReactionRepository reactionRepository;
+    CommentRepository commentRepository;
 
     @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
@@ -164,20 +163,56 @@ public class PostService {
             return group == null || joinedGroupIds.contains(group.getGroupId());
         }).toList();
 
-        return filteredPosts.stream().map(post -> {
+        return convertToListNewsFeedResponse(filteredPosts, userLoginId);
+    }
+
+    //convert list post from repository to list NewsFeedResponse
+    private List<NewsFeedResponse> convertToListNewsFeedResponse(List<Post> posts, Long userId) {
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        List<Long> postIds = posts.stream().map(Post::getPostId).toList();
+        //get list total reaction by post id
+        Map<Long, Long> reactCounts = mapListObjectToMap(reactionRepository.countReactionsForPostIds(postIds));
+        //get list total comment by post id
+        Map<Long, Long> commentCounts = mapListObjectToMap(commentRepository.countCommentsForPostIds(postIds));
+        //get list post liked by user
+        Set<Long> likedPostIds = reactionRepository.findPostIdsLikedByUser(postIds, userId);
+
+        return posts.stream().map(post -> {
             NewsFeedResponse newsFeedResponse = postMapper.toNewsFeedResponse(post);
-            PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
             String seenAt = prettyTime.format(post.getCreateDate());
             newsFeedResponse.setSeenAt(seenAt);
             newsFeedResponse.setMedias(post.getMedias().stream().map(mediaMapper::toMediaResponse).toList());
+
+            Long postId = post.getPostId();
+            newsFeedResponse.setReactCount(reactCounts.getOrDefault(postId, 0L));
+            newsFeedResponse.setCommentCount(commentCounts.getOrDefault(postId, 0L));
+            newsFeedResponse.setLiked(likedPostIds.contains(postId));
             return newsFeedResponse;
         }).toList();
     }
 
-    public NewsFeedResponse getPostByPostId (Long postId) {
+    // convert list object from repository to Map
+    private Map<Long, Long> mapListObjectToMap(List<Object[]> listObjects) {
+        return listObjects.stream().collect(Collectors.toMap(
+                row -> (Long) row[0], row -> (Long) row[1]
+        ));
+    }
+
+    public NewsFeedResponse getPostByPostId(Long postId) {
         Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         return postMapper.toNewsFeedResponse(post);
+    }
+
+    public PageableListResponse<NewsFeedResponse> getListPostByUserId(int page, int limit, Long userId) {
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        List<Post> posts = postRepository.findAllByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable).getContent();
+        PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
+        response.setListResults(convertToListNewsFeedResponse(posts, userId));
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) Math.ceil((double) posts.size() / limit));
+        return response;
     }
 
 

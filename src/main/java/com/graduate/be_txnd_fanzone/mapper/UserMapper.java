@@ -25,4 +25,11 @@ public interface UserMapper {
     UpdateUserResponse toUpdateUserResponse (User user);
 
     UserInfoResponse toUserInfoResponse (User user);
+
+    PersonalPageResponse toPersonalPageResponse (User user);
+
+    @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "emailAddress", ignore = true)
+    @Mapping(target = "address", ignore = true)
+    PersonalPageResponse toOtherUserPersonalPageResponse (User user);
 }

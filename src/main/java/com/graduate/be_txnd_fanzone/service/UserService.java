@@ -7,10 +7,13 @@ import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.UserMapper;
 import com.graduate.be_txnd_fanzone.model.Role;
 import com.graduate.be_txnd_fanzone.model.User;
+import com.graduate.be_txnd_fanzone.repository.FriendRepository;
+import com.graduate.be_txnd_fanzone.repository.PostRepository;
 import com.graduate.be_txnd_fanzone.repository.RoleRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.util.JwtUtil;
 import com.graduate.be_txnd_fanzone.util.OtpRandomUtil;
+import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -25,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,11 +43,15 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     JwtUtil jwtUtil;
     EmailService emailService;
+    SecurityUtil securityUtil;
+    FriendRepository friendRepository;
+    PostRepository postRepository;
 
     public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) throw new CustomException(ErrorCode.USER_EXISTED);
-        if (userRepository.existsByEmailAddress(request.getEmailAddress())) throw new CustomException(ErrorCode.EMAIL_EXISTED);
+        if (userRepository.existsByEmailAddress(request.getEmailAddress()))
+            throw new CustomException(ErrorCode.EMAIL_EXISTED);
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -60,10 +70,10 @@ public class UserService {
         User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if(!usernameLogin.equals(user.getUsername())) throw new CustomException(ErrorCode.UNAUTHENTICATED);
+        if (!usernameLogin.equals(user.getUsername())) throw new CustomException(ErrorCode.UNAUTHENTICATED);
         user = userMapper.updateUser(user, request);
 
-        if(request.getPassword() != null) user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getPassword() != null) user.setPassword(passwordEncoder.encode(request.getPassword()));
         UpdateUserResponse response = userMapper.toUpdateUserResponse(user);
         response.setRole(user.getRole().getRoleName());
         return response;
@@ -100,15 +110,24 @@ public class UserService {
         emailService.sendForgotPasswordEmail(user.getEmailAddress(), user.getUsername(), otp);
     }
 
-    public UserInfoResponse getUserInfo(Long userId) {
+    public PersonalPageResponse getPersonalPage(Long userId) {
         User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        return userMapper.toUserInfoResponse(user);
+        Long userLoginId = securityUtil.getCurrentUserId();
+
+        if (!Objects.equals(userLoginId, user.getUserId())) {
+            return userMapper.toOtherUserPersonalPageResponse(user);
+        }
+
+        PersonalPageResponse response = userMapper.toPersonalPageResponse(user);
+        System.out.println("response.getEmailAddress() = " + response.getEmailAddress());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        response.setDateOfBirth(user.getCreateDate().toLocalDate().format(formatter));
+        response.setTotalFriends(friendRepository.countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 1)
+                + friendRepository.countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 1));
+        response.setTotalPosts(postRepository.countByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(userLoginId));
+        return response;
     }
-
-
-
-
 
 
 }

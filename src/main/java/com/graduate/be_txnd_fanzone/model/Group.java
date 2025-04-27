@@ -21,6 +21,9 @@ public class Group extends BaseModel {
     @Column(name = "group_name")
     String groupName;
 
+    @Column(name = "description")
+    String description;
+
     // 0: private, 1: public, 2:fandom
     @Column(name = "group_type")
     Byte type;

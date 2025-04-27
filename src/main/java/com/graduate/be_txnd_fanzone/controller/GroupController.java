@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
@@ -34,15 +35,40 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping("{groupId}")
-    public ResponseEntity<ApiResponse<String>> updateGroup(@PathVariable Long groupId) {
+    @PatchMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<String>> deleteGroup(@PathVariable Long groupId) {
         groupService.softDeleteGroup(groupId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<GroupResponse>>> getAllGroups(@RequestParam int page, @RequestParam int limit) {
-        ApiResponse<List<GroupResponse>> response = new ApiResponse<>(groupService.getAllGroups(page, limit));
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupResponse>>> getAllGroups(@RequestParam int page, @RequestParam int limit) {
+        ApiResponse<PageableListResponse<GroupResponse>> response = new ApiResponse<>(groupService.getAllGroups(page, limit));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/group-type")
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupResponse>>> getGroupsWithTypes(@RequestParam int page,
+                                                                                               @RequestParam int limit,
+                                                                                               @RequestParam Byte type) {
+        ApiResponse<PageableListResponse<GroupResponse>> response = new ApiResponse<>(
+                groupService.getListGroupsWithType(page, limit, type));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-joined")
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupResponse>>> getGroupsWithUserId (@RequestParam int page,
+                                                                                               @RequestParam int limit,
+                                                                                               @RequestParam Long userId) {
+        ApiResponse<PageableListResponse<GroupResponse>> response = new ApiResponse<>(
+                groupService.getListGroupsWithUserId(page, limit, userId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<GroupResponse>> getGroupById(@PathVariable Long groupId) {
+        ApiResponse<GroupResponse> response = new ApiResponse<>(groupService.getGroupById(groupId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

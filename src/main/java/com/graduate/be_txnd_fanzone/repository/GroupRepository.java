@@ -4,8 +4,11 @@ import com.graduate.be_txnd_fanzone.model.Group;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +17,15 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByGroupIdAndDeleteFlagIsFalse(Long groupId);
 
     Page<Group> findAllByDeleteFlagIsFalse(Pageable pageable);
+
+    Page<Group> findAllByTypeAndDeleteFlagIsTrue(Byte type, Pageable pageable);
+
+    @Query("SELECT g FROM Group g " +
+            "JOIN GroupMember gm ON g.groupId = gm.group.groupId " +
+            "JOIN User u ON gm.user.userId = u.userId " +
+            "WHERE u.userId = :userId")
+    Page<Group> findGroupsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    Optional<Group> findGroupsByGroupIdAndDeleteFlagIsFalse(Long groupId);
+
 }

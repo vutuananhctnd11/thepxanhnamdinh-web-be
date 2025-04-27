@@ -21,6 +21,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     Page<Friend> findAllByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status, Pageable pageable);
 
+    long countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status);
+
+    long countBySender_UserIdAndStatusAndDeleteFlagIsFalse(Long sender, Byte status);
+
     @Query("""
     SELECT f FROM Friend f
     WHERE\s

@@ -15,4 +15,12 @@ public class Reaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reaction_id", nullable = false)
     Long reactionId;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    Post post;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
 }

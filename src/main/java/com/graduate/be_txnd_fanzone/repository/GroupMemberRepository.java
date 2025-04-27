@@ -3,8 +3,11 @@ package com.graduate.be_txnd_fanzone.repository;
 import com.graduate.be_txnd_fanzone.model.GroupMember;
 import com.graduate.be_txnd_fanzone.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,5 +19,13 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     Optional<GroupMember> findByGroupMemberIdAndDeleteFlagIsFalse(Long groupMemberId);
 
-    Long user(User user);
+    @Query("SELECT gm.group.groupId, COUNT(gm) " +
+            "FROM GroupMember gm " +
+            "WHERE gm.group.groupId IN :groupIds " +
+            "GROUP BY gm.group.groupId")
+    List<Object[]> countMembersForGroupIds(@Param("groupIds") List<Long> groupIds);
+
+    List<GroupMember> findByUser_UserIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId);
+
+    long countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId);
 }

@@ -48,4 +48,7 @@ public class Post extends BaseModel {
 
     @OneToMany(mappedBy = "post")
     List<Comment> comments;
+
+    @OneToMany(mappedBy = "post")
+    List<Reaction> reactions;
 }

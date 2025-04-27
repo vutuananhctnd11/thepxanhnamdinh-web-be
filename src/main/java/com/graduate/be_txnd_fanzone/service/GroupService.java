@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
@@ -22,7 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,10 +72,69 @@ public class GroupService {
         groupRepository.save(group);
     }
 
-    public List<GroupResponse> getAllGroups(int page, int limit) {
+    public PageableListResponse<GroupResponse> getAllGroups(int page, int limit) {
         Pageable pageable = PageRequest.of(page-1, limit);
         List<Group> groups = groupRepository.findAllByDeleteFlagIsFalse(pageable).getContent();
-        return groups.stream().map(groupMapper::toGroupResponse).collect(Collectors.toList());
+        PageableListResponse<GroupResponse> response = new PageableListResponse<>();
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setListResults(convertListGroupToGroupResponse(groups));
+        return response;
     }
+
+    // convert list object from repository to Map
+    private Map<Long, Long> mapListObjectToMap(List<Object[]> listObjects) {
+        return listObjects.stream().collect(Collectors.toMap(
+                row -> (Long) row[0], row -> (Long) row[1]
+        ));
+    }
+
+    //convert list group from repository to list GroupResponse
+    private List<GroupResponse> convertListGroupToGroupResponse(List<Group> groups) {
+        List<Long> groupIds = groups.stream().map(Group::getGroupId).toList();
+        Map<Long, Long> memberOfGroupId = mapListObjectToMap(groupMemberRepository.countMembersForGroupIds(groupIds));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        return groups.stream().map(group -> {
+            GroupResponse groupResponse = groupMapper.toGroupResponse(group);
+            groupResponse.setCreatedDate(group.getCreateDate().toLocalDate().format(formatter));
+            groupResponse.setTotalMembers(memberOfGroupId.getOrDefault(group.getGroupId(), 0L));
+            return groupResponse;
+        }).toList();
+    }
+
+    public PageableListResponse<GroupResponse> getListGroupsWithType(int page, int limit, Byte type) {
+        Pageable pageable = PageRequest.of(page-1, limit);
+        List<Group> groups = groupRepository.findAllByTypeAndDeleteFlagIsTrue(type, pageable).getContent();
+        PageableListResponse<GroupResponse> response = new PageableListResponse<>();
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setListResults(convertListGroupToGroupResponse(groups));
+        return response;
+    }
+
+    public PageableListResponse<GroupResponse> getListGroupsWithUserId(int page, int limit, Long userId) {
+        Pageable pageable = PageRequest.of(page-1, limit);
+
+        List<Group> listGroupJoined = groupRepository.findGroupsByUserId(userId, pageable).getContent();
+        Collections.shuffle(listGroupJoined);
+        PageableListResponse<GroupResponse> response = new PageableListResponse<>();
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setListResults(convertListGroupToGroupResponse(listGroupJoined));
+        return response;
+    }
+
+    public GroupResponse getGroupById(Long groupId) {
+        Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+        GroupResponse response = groupMapper.toGroupResponse(group);
+        response.setTotalMembers(groupMemberRepository.countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(groupId));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        response.setCreatedDate(group.getCreateDate().toLocalDate().format(formatter));
+        return response;
+    }
+
+
 
 }

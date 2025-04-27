@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 public class CreateGroupRequest {
 
     String groupName;
+    String description;
     Byte type;
     Boolean censorPost;
     Boolean censorMember;

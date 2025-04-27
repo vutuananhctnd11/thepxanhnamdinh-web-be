@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.post.*;
 import com.graduate.be_txnd_fanzone.service.PostService;
 import lombok.AccessLevel;
@@ -27,39 +28,39 @@ public class PostController {
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost (@RequestBody UpdatePostRequest request) {
+    public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost(@RequestBody UpdatePostRequest request) {
         ApiResponse<UpdatePostResponse> apiResponse = new ApiResponse<>(postService.updatePost(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PatchMapping("/status")
-    public ResponseEntity<ApiResponse<String>> changePostStatus (@RequestBody UpdatePostStatusRequest request) {
+    public ResponseEntity<ApiResponse<String>> changePostStatus(@RequestBody UpdatePostStatusRequest request) {
         postService.changeStatus(request);
-        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @PatchMapping("/{postId}/delete")
-    public ResponseEntity<ApiResponse<String>> deletePost (@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<String>> deletePost(@PathVariable Long postId) {
         postService.softDeleteOrRestorePost(postId, true);
-        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @PatchMapping("/{postId}/restore")
-    public ResponseEntity<ApiResponse<String>> restorePost (@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<String>> restorePost(@PathVariable Long postId) {
         postService.softDeleteOrRestorePost(postId, false);
-        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @PatchMapping("/{postId}/approve")
-    public ResponseEntity<ApiResponse<String>> approveGroupPost (@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<String>> approveGroupPost(@PathVariable Long postId) {
         postService.approveGroupPost(postId);
-        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @PatchMapping("/{postId}/reject")
-    public ResponseEntity<ApiResponse<String>> rejectGroupPost (@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<String>> rejectGroupPost(@PathVariable Long postId) {
         postService.rejectGroupPost(postId);
-        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
     @GetMapping("/news-feed")
@@ -74,10 +75,14 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-
-
-
-
+    @GetMapping("/personal-page")
+    public ResponseEntity<ApiResponse<PageableListResponse<NewsFeedResponse>>> getListPostByUserId(@RequestParam int page,
+                                                                                                   @RequestParam int limit,
+                                                                                                   @RequestParam Long userId) {
+        ApiResponse<PageableListResponse<NewsFeedResponse>> apiResponse = new ApiResponse<>(
+                postService.getListPostByUserId(page, limit, userId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
 
 }

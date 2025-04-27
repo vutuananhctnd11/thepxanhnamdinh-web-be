@@ -58,9 +58,9 @@ public class UserController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo (@RequestParam Long userId) {
-        ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserInfo(userId));
+    @GetMapping("/personal-page")
+    public ResponseEntity<ApiResponse<PersonalPageResponse>> getUserInfo (@RequestParam Long userId) {
+        ApiResponse<PersonalPageResponse> apiResponse = new ApiResponse<>(userService.getPersonalPage(userId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
