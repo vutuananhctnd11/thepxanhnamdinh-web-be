@@ -84,5 +84,16 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/group")
+    public ResponseEntity<ApiResponse<PageableListResponse<NewsFeedResponse>>> getListPostByGroupId(@RequestParam int page,
+                                                                                                   @RequestParam int limit,
+                                                                                                   @RequestParam Long groupId) {
+        ApiResponse<PageableListResponse<NewsFeedResponse>> apiResponse = new ApiResponse<>(
+                postService.getListPostByGroupId(page, limit, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+
 
 }

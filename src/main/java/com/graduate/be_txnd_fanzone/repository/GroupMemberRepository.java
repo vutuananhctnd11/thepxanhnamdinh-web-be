@@ -28,4 +28,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     List<GroupMember> findByUser_UserIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId);
 
     long countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId);
+    Optional<GroupMember> findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId, Long groupId);
+
+
 }

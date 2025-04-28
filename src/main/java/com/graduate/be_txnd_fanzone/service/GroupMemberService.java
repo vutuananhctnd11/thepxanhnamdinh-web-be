@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
+import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -90,5 +91,19 @@ public class GroupMemberService {
         } else {
             throw new CustomException(ErrorCode.NO_PERMISSION);
         }
+    }
+
+    public CheckIsMemberResponse isMember (Long userId, Long groupId) {
+        CheckIsMemberResponse response = new CheckIsMemberResponse();
+        boolean checkMember = groupMemberRepository
+                .existsByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userId, groupId);
+        if (checkMember) {
+            GroupMember groupMember = groupMemberRepository
+                    .findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userId, groupId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.GROUP_MEMBER_NOT_FOUND));
+            response.setMemberRole(groupMember.getMemberRole());
+        }
+        response.setIsMember(checkMember);
+        return response;
     }
 }

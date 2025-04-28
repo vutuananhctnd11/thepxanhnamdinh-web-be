@@ -2,6 +2,7 @@ package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
+import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
 import com.graduate.be_txnd_fanzone.service.GroupMemberService;
 import lombok.AccessLevel;
@@ -30,5 +31,11 @@ public class GroupMemberController {
     public ResponseEntity<ApiResponse<String>> approveGroupMemberRequest(@PathVariable Long groupMemberId) {
         groupMemberService.approveMember(groupMemberId);
         return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<CheckIsMemberResponse>> isMember (@RequestParam Long userId, @RequestParam Long groupId) {
+        ApiResponse<CheckIsMemberResponse> apiResponse = new ApiResponse<>(groupMemberService.isMember(userId, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

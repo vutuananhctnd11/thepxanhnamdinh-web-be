@@ -31,4 +31,10 @@ public class MediaService {
         media = mediaMapper.updateMedia(request, media);
         return mediaRepository.save(media);
     }
+
+    public void deleteMedia(Long mediaId) {
+        Media media = mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEDIA_NOT_FOUND));
+        mediaRepository.delete(media);
+    }
 }

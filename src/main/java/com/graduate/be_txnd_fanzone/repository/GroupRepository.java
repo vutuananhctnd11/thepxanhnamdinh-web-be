@@ -28,4 +28,14 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findGroupsByGroupIdAndDeleteFlagIsFalse(Long groupId);
 
+    @Query("""
+            SELECT g.groupId
+            FROM Group g
+                JOIN GroupMember gm ON g.groupId = gm.group.groupId
+                JOIN User u ON gm.user.userId = u.userId
+            WHERE u.userId = :userId
+                AND gm.approved = true
+    """)
+    List<Long> findGroupIdsByUserId(@Param("userId") Long userId);
+
 }

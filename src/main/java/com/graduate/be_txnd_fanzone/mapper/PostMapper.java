@@ -10,7 +10,6 @@ import org.mapstruct.MappingTarget;
 public interface PostMapper {
 
     @Mapping(target = "reportFlag", constant = "false")
-    @Mapping(target = "censorFlag", constant = "true")
     Post toPost(CreatePostRequest request);
 
     CreatePostResponse toCreatePostResponse(Post post);

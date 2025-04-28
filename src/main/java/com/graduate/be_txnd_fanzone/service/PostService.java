@@ -1,6 +1,8 @@
 package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
+import com.graduate.be_txnd_fanzone.dto.media.CreateMediaRequest;
+import com.graduate.be_txnd_fanzone.dto.media.UpdateMediaRequest;
 import com.graduate.be_txnd_fanzone.dto.post.*;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -40,6 +42,9 @@ public class PostService {
     SecurityUtil securityUtil;
     ReactionRepository reactionRepository;
     CommentRepository commentRepository;
+    GroupRepository groupRepository;
+    FriendRepository friendRepository;
+    MediaRepository mediaRepository;
 
     @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
@@ -50,6 +55,14 @@ public class PostService {
         //create news feed
         Post post = postMapper.toPost(request);
         post.setUser(userLogin);
+        if (request.getGroupId() != null) {
+            Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(request.getGroupId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+            post.setGroup(group);
+            post.setCensorFlag(!group.getCensorPost());
+        } else {
+            post.setCensorFlag(true);
+        }
         postRepository.save(post);
 
         //create list media
@@ -72,19 +85,33 @@ public class PostService {
         Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        List<Long> listMediasIds = mediaRepository.getListMediaIdsOfPost(postUpdate.getPostId());
+
         //update list media
-        List<Media> mediasUpdate = request.getMedias().stream().map(mediaService::updateMedia).toList();
+        List<Media> mediasUpdate = new ArrayList<>();
+        for (UpdateMediaRequest updateMediaRequest : request.getMedias()) {
+            if (updateMediaRequest.getMediaId() != null && !listMediasIds.contains(updateMediaRequest.getMediaId())) {
+                mediaService.deleteMedia(updateMediaRequest.getMediaId());
+            } else if (updateMediaRequest.getMediaId() == null) {
+                CreateMediaRequest createMediaRequest = new CreateMediaRequest();
+                createMediaRequest.setLinkCloud(updateMediaRequest.getLinkCloud());
+                createMediaRequest.setType(updateMediaRequest.getType());
+                Media media = mediaService.createMedia(createMediaRequest);
+                media.setPost(postUpdate);
+                mediasUpdate.add(media);
+            }
+        }
 
-        //update post
-        postUpdate = postMapper.updatePost(request, postUpdate);
-        postUpdate.setMedias(mediasUpdate);
-        postRepository.save(postUpdate);
+            //update post
+            postUpdate = postMapper.updatePost(request, postUpdate);
+            postUpdate.setMedias(mediasUpdate);
+            postRepository.save(postUpdate);
 
-        // mapper to update response
-        UpdatePostResponse response = postMapper.toUpdatePostResponse(postUpdate);
-        response.setMedias(mediasUpdate.stream().map(mediaMapper::toMediaResponse).toList());
-        return response;
-    }
+            // mapper to update response
+            UpdatePostResponse response = postMapper.toUpdatePostResponse(postUpdate);
+            response.setMedias(mediasUpdate.stream().map(mediaMapper::toMediaResponse).toList());
+            return response;
+        }
 
     public void changeStatus(UpdatePostStatusRequest request) {
         Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
@@ -149,21 +176,34 @@ public class PostService {
     }
 
     public List<NewsFeedResponse> getNewsFeed(int page, int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
-        List<Post> posts = postRepository.findAllByDeleteFlagIsFalseAndCensorFlagIsTrueOrderByCreateDateDesc(pageable).getContent();
+        List<Post> allPosts = postRepository.findAllByDeleteFlagIsFalseAndCensorFlagIsTrueOrderByCreateDateDesc();
+
+        //get user login
         Long userLoginId = securityUtil.getCurrentUserId();
-
-        User userLogin = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
+        User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        List<Long> joinedGroupIds = userLogin.getGroupMembers().stream()
-                .map(groupMember -> groupMember.getGroup().getGroupId()).toList();
 
-        List<Post> filteredPosts = posts.stream().filter(post -> {
+        //get list friend id
+        List<Long> friendIds = friendRepository.getListFriendIds(userLoginId);
+        //get list joined group
+        List<Long> joinedGroupIds = groupRepository.findGroupIdsByUserId(userLoginId);
+        //filter remove post
+        List<Post> filteredPosts = allPosts.stream().filter(post -> {
             Group group = post.getGroup();
-            return group == null || joinedGroupIds.contains(group.getGroupId());
-        }).toList();
+            boolean isFriendPost = friendIds.contains(post.getUser().getUserId());
+            boolean isPublicPost = post.getStatus() == 1;
+            boolean isUserPost = post.getUser().getUserId().equals(userLoginId);
+            boolean isInGroup = group != null && joinedGroupIds.contains(group.getGroupId());
 
-        return convertToListNewsFeedResponse(filteredPosts, userLoginId);
+            return isFriendPost || isPublicPost || isUserPost || isInGroup;
+        }).collect(Collectors.toList());
+
+        int start = (page - 1) * limit;
+        int end = Math.min(start + limit, filteredPosts.size());
+
+        List<Post> pagedPosts = filteredPosts.subList(start, end);
+
+        return convertToListNewsFeedResponse(pagedPosts, userLoginId);
     }
 
     //convert list post from repository to list NewsFeedResponse
@@ -213,6 +253,25 @@ public class PostService {
         response.setLimit(limit);
         response.setTotalPage((long) Math.ceil((double) posts.size() / limit));
         return response;
+    }
+
+    public PageableListResponse<NewsFeedResponse> getListPostByGroupId(int page, int limit, Long groupId) {
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
+        Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+        if (group.getType() != 1) {
+            response.setListResults(new ArrayList<>());
+            return response;
+        }
+        List<Post> posts = postRepository
+                .findAllByGroup_GroupIdAndCensorFlagIsTrueAndDeleteFlagIsFalse(groupId, pageable).getContent();
+        response.setListResults(convertToListNewsFeedResponse(posts, securityUtil.getCurrentUserId()));
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) Math.ceil((double) posts.size() / limit));
+        return response;
+
     }
 
 

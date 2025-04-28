@@ -14,6 +14,7 @@ public class CreatePostRequest {
     String content;
     Byte type;
     Byte status;
+    Long groupId;
     List<CreateMediaRequest> medias;
 
 }

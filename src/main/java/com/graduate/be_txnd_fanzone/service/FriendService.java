@@ -129,15 +129,16 @@ public class FriendService {
         return friendList.stream().map(friend -> {
             FriendResponse friendResponse = new FriendResponse();
             if (friend.getReceiver().getUserId().equals(userLoginId)) {
-                friendResponse.setId(friend.getSender().getUserId());
+                friendResponse.setUserId(friend.getSender().getUserId());
                 friendResponse.setFullName(friend.getSender().getFirstName() + " " + friend.getSender().getLastName());
                 friendResponse.setAvatar(friend.getSender().getAvatar());
             } else {
-                friendResponse.setId(friend.getReceiver().getUserId());
+                friendResponse.setUserId(friend.getReceiver().getUserId());
                 friendResponse.setFullName(friend.getReceiver().getFirstName() + " " + friend.getReceiver().getLastName());
                 friendResponse.setAvatar(friend.getReceiver().getAvatar());
             }
             friendResponse.setFriendAt(prettyTime.format(friend.getUpdateDate()));
+            friendResponse.setFriendId(friend.getFriendId());
             return friendResponse;
         }).collect(Collectors.toList());
     }
