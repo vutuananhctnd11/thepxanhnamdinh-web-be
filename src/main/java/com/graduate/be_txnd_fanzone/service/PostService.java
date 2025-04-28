@@ -90,8 +90,8 @@ public class PostService {
         //update list media
         List<Media> mediasUpdate = new ArrayList<>();
         for (UpdateMediaRequest updateMediaRequest : request.getMedias()) {
-            if (updateMediaRequest.getMediaId() != null && !listMediasIds.contains(updateMediaRequest.getMediaId())) {
-                mediaService.deleteMedia(updateMediaRequest.getMediaId());
+            if (updateMediaRequest.getMediaId() != null && listMediasIds.contains(updateMediaRequest.getMediaId())) {
+                listMediasIds.remove(updateMediaRequest.getMediaId());
             } else if (updateMediaRequest.getMediaId() == null) {
                 CreateMediaRequest createMediaRequest = new CreateMediaRequest();
                 createMediaRequest.setLinkCloud(updateMediaRequest.getLinkCloud());
@@ -101,17 +101,19 @@ public class PostService {
                 mediasUpdate.add(media);
             }
         }
+        //remove media
+        listMediasIds.forEach(mediaService::deleteMedia);
 
-            //update post
-            postUpdate = postMapper.updatePost(request, postUpdate);
-            postUpdate.setMedias(mediasUpdate);
-            postRepository.save(postUpdate);
+        //update post
+        postUpdate = postMapper.updatePost(request, postUpdate);
+        postUpdate.setMedias(mediasUpdate);
+        postRepository.save(postUpdate);
 
-            // mapper to update response
-            UpdatePostResponse response = postMapper.toUpdatePostResponse(postUpdate);
-            response.setMedias(mediasUpdate.stream().map(mediaMapper::toMediaResponse).toList());
-            return response;
-        }
+        // mapper to update response
+        UpdatePostResponse response = postMapper.toUpdatePostResponse(postUpdate);
+        response.setMedias(mediasUpdate.stream().map(mediaMapper::toMediaResponse).toList());
+        return response;
+    }
 
     public void changeStatus(UpdatePostStatusRequest request) {
         Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
@@ -241,11 +243,20 @@ public class PostService {
     public NewsFeedResponse getPostByPostId(Long postId) {
         Post post = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        return postMapper.toNewsFeedResponse(post);
+        NewsFeedResponse response = postMapper.toNewsFeedResponse(post);
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        String seenAt = prettyTime.format(post.getCreateDate());
+        response.setSeenAt(seenAt);
+        response.setMedias(post.getMedias().stream().map(mediaMapper::toMediaResponse).toList());
+
+        response.setReactCount(reactionRepository.countByPost_PostId(postId));
+        response.setCommentCount(commentRepository.countByPost_PostIdAndDeleteFlagIsFalse(postId));
+        response.setLiked(reactionRepository.existsByPost_PostIdAndUser_UserId(postId, securityUtil.getCurrentUserId()));
+        return response;
     }
 
     public PageableListResponse<NewsFeedResponse> getListPostByUserId(int page, int limit, Long userId) {
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         List<Post> posts = postRepository.findAllByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable).getContent();
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
         response.setListResults(convertToListNewsFeedResponse(posts, userId));
@@ -256,7 +267,7 @@ public class PostService {
     }
 
     public PageableListResponse<NewsFeedResponse> getListPostByGroupId(int page, int limit, Long groupId) {
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
         Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
