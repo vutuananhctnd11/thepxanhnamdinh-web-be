@@ -51,4 +51,11 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
         AND f.deleteFlag = false)
     \s""")
     List<Long> getListFriendIds(@Param("userId") Long userId);
+
+    @Query("SELECT f FROM Friend f " +
+            "WHERE f.status = 1 " +
+            "AND(" +
+            "   (f.sender.userId = :userId1 AND f.receiver.userId = :userId2) " +
+            "OR (f.sender.userId = :userId2 AND f.receiver.userId = :userId1))")
+    Optional<Friend> findAcceptedFriendRelation(Long userId1, Long userId2);
 }

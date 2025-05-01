@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
 import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
@@ -17,8 +18,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.ocpsoft.prettytime.PrettyTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -105,5 +110,36 @@ public class GroupMemberService {
         }
         response.setIsMember(checkMember);
         return response;
+    }
+
+    public PageableListResponse<GroupMemberResponse> getListMember (int page, int limit, Long groupId) {
+        Pageable pageable = PageRequest.of(page-1, limit);
+        Page<GroupMember> groupMemberPage = groupMemberRepository
+                .findByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(groupId, pageable);
+
+        return convertToResponse(page, limit, groupMemberPage);
+    }
+
+    private PageableListResponse<GroupMemberResponse> convertToResponse (int page, int limit, Page<GroupMember> listPage) {
+        PageableListResponse<GroupMemberResponse> response = new PageableListResponse<>();
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        List<GroupMemberResponse> memberResponseList = listPage.getContent().stream().map(groupMember -> {
+            GroupMemberResponse groupMemberResponse = groupMemberMapper.toGroupMemberResponse(groupMember);
+            groupMemberResponse.setRequestAt(prettyTime.format(groupMember.getCreateDate()));
+            return groupMemberResponse;
+        }).toList();
+        response.setListResults(memberResponseList);
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage(listPage.getTotalElements());
+        return response;
+    }
+
+    public PageableListResponse<GroupMemberResponse> getListGroupManager (int page, int limit, Long groupId) {
+        PageableListResponse<GroupMemberResponse> response = new PageableListResponse<>();
+        Pageable pageable = PageRequest.of(page-1, limit);
+        Page<GroupMember> groupMemberPage = groupMemberRepository.findGroupManager(groupId, pageable);
+
+        return convertToResponse(page, limit, groupMemberPage);
     }
 }

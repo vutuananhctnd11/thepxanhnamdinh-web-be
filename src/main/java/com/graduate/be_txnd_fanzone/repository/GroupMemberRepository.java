@@ -2,6 +2,8 @@ package com.graduate.be_txnd_fanzone.repository;
 
 import com.graduate.be_txnd_fanzone.model.GroupMember;
 import com.graduate.be_txnd_fanzone.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,10 +27,19 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
             "GROUP BY gm.group.groupId")
     List<Object[]> countMembersForGroupIds(@Param("groupIds") List<Long> groupIds);
 
-    List<GroupMember> findByUser_UserIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId);
-
     long countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId);
+
     Optional<GroupMember> findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long userId, Long groupId);
+
+    Page<GroupMember> findByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId, Pageable pageable);
+
+
+    @Query("SELECT gm " +
+            "FROM GroupMember gm " +
+            "WHERE gm.group.groupId = :groupId " +
+            "AND (gm.memberRole = 1 OR gm.memberRole = 2) " +
+            "ORDER BY gm.memberRole")
+    Page<GroupMember> findGroupManager(@Param("groupId") Long groupId, Pageable pageable);
 
 
 }

@@ -8,10 +8,7 @@ import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.MediaMapper;
 import com.graduate.be_txnd_fanzone.mapper.PostMapper;
-import com.graduate.be_txnd_fanzone.model.Group;
-import com.graduate.be_txnd_fanzone.model.Media;
-import com.graduate.be_txnd_fanzone.model.Post;
-import com.graduate.be_txnd_fanzone.model.User;
+import com.graduate.be_txnd_fanzone.model.*;
 import com.graduate.be_txnd_fanzone.repository.*;
 import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
@@ -257,7 +254,16 @@ public class PostService {
 
     public PageableListResponse<NewsFeedResponse> getListPostByUserId(int page, int limit, Long userId) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
-        List<Post> posts = postRepository.findAllByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable).getContent();
+        Long userLoginId = securityUtil.getCurrentUserId();
+        boolean isOwner = userLoginId.equals(userId);
+        boolean isFriend = isOwner || friendRepository.findAcceptedFriendRelation(userId, userLoginId).isPresent();
+
+        List<Post> posts;
+        if (isFriend) {
+            posts = postRepository.findAllByUser_UserIdAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable).getContent();
+        } else {
+            posts = postRepository.findAllByUser_UserIdAndStatusAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, (byte) 1, pageable).getContent();
+        }
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
         response.setListResults(convertToListNewsFeedResponse(posts, userId));
         response.setPage(page);
