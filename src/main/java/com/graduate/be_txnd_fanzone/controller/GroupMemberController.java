@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
 import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
@@ -36,6 +37,22 @@ public class GroupMemberController {
     @GetMapping
     public ResponseEntity<ApiResponse<CheckIsMemberResponse>> isMember (@RequestParam Long userId, @RequestParam Long groupId) {
         ApiResponse<CheckIsMemberResponse> apiResponse = new ApiResponse<>(groupMemberService.isMember(userId, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupMemberResponse>>> getListGroupMembers (
+            @RequestParam Long groupId, @RequestParam int page, @RequestParam int limit) {
+        ApiResponse<PageableListResponse<GroupMemberResponse>> apiResponse = new ApiResponse<>(
+                groupMemberService.getListMember(page, limit, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/manager")
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupMemberResponse>>> getListGroupMemberManager (
+            @RequestParam Long groupId, @RequestParam int page, @RequestParam int limit) {
+        ApiResponse<PageableListResponse<GroupMemberResponse>> apiResponse = new ApiResponse<>(
+                groupMemberService.getListMember(page, limit, groupId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
