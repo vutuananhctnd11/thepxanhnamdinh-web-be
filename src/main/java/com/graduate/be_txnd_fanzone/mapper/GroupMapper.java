@@ -3,6 +3,7 @@ package com.graduate.be_txnd_fanzone.mapper;
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
+import com.graduate.be_txnd_fanzone.dto.search.SearchGroupResponse;
 import com.graduate.be_txnd_fanzone.model.Group;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,4 +18,6 @@ public interface GroupMapper {
 
     @Mapping(target = "groupId", ignore = true)
     Group updateGroup(UpdateGroupRequest request,@MappingTarget Group group);
+
+    SearchGroupResponse toSearchGroupResponse(Group group);
 }

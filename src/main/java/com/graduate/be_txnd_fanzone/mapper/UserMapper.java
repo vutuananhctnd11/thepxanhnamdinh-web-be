@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
+import com.graduate.be_txnd_fanzone.dto.search.SearchUserResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.model.User;
 import org.mapstruct.Mapper;
@@ -32,4 +33,7 @@ public interface UserMapper {
     @Mapping(target = "emailAddress", ignore = true)
     @Mapping(target = "address", ignore = true)
     PersonalPageResponse toOtherUserPersonalPageResponse (User user);
+
+    @Mapping(target = "fullName", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
+    SearchUserResponse toSearchUserResponse (User user);
 }

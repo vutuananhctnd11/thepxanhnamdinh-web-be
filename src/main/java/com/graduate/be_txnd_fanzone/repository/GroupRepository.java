@@ -38,4 +38,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     """)
     List<Long> findGroupIdsByUserId(@Param("userId") Long userId);
 
+    @Query("""
+            SELECT g
+            FROM Group g
+            WHERE
+                LOWER(g.groupName) LIKE LOWER(CONCAT('%', :search , '%'))
+                AND g.deleteFlag=false
+            """)
+    Page<Group> searchGroups(@Param("search") String search, Pageable pageable);
+
 }

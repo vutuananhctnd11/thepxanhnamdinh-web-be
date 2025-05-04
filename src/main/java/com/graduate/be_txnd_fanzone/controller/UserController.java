@@ -1,6 +1,9 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
+import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
+import com.graduate.be_txnd_fanzone.dto.search.SearchUserResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.service.UserService;
@@ -61,6 +64,12 @@ public class UserController {
     @GetMapping("/personal-page")
     public ResponseEntity<ApiResponse<PersonalPageResponse>> getUserInfo (@RequestParam Long userId) {
         ApiResponse<PersonalPageResponse> apiResponse = new ApiResponse<>(userService.getPersonalPage(userId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<PageableListResponse<SearchUserResponse>>> searchUsers (@RequestBody SearchRequest request) {
+        ApiResponse<PageableListResponse<SearchUserResponse>> apiResponse = new ApiResponse<>(userService.searchUsers(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

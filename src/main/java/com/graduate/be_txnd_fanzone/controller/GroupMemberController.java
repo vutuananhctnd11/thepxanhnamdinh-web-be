@@ -40,7 +40,7 @@ public class GroupMemberController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping()
+    @GetMapping("/list-member")
     public ResponseEntity<ApiResponse<PageableListResponse<GroupMemberResponse>>> getListGroupMembers (
             @RequestParam Long groupId, @RequestParam int page, @RequestParam int limit) {
         ApiResponse<PageableListResponse<GroupMemberResponse>> apiResponse = new ApiResponse<>(

@@ -5,7 +5,6 @@ import com.graduate.be_txnd_fanzone.dto.friend.AddFriendRequest;
 import com.graduate.be_txnd_fanzone.dto.friend.FriendResponse;
 import com.graduate.be_txnd_fanzone.dto.friend.ListAddFriendReceivedResponse;
 import com.graduate.be_txnd_fanzone.dto.friend.ListAddFriendSentResponse;
-import com.graduate.be_txnd_fanzone.model.Friend;
 import com.graduate.be_txnd_fanzone.service.FriendService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +29,27 @@ public class FriendController {
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/accept/{friendId}")
-    public ResponseEntity<ApiResponse<String>> acceptAddFriendRequest (@PathVariable Long friendId) {
-        friendService.acceptAddFriendRequest(friendId);
+    @PatchMapping("/accept/{userId}")
+    public ResponseEntity<ApiResponse<String>> acceptAddFriendRequest (@PathVariable Long userId) {
+        friendService.acceptAddFriendRequest(userId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
-    @DeleteMapping("/reject/{friendId}")
-    public ResponseEntity<ApiResponse<String>> rejectAddFriendRequest (@PathVariable Long friendId) {
-        friendService.rejectAddFriendRequest(friendId);
+    @DeleteMapping("/reject/{userId}")
+    public ResponseEntity<ApiResponse<String>> rejectAddFriendRequest (@PathVariable Long userId) {
+        friendService.rejectAddFriendRequest(userId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{friendId}")
-    public ResponseEntity<ApiResponse<String>> deleteAddFriendRequest (@PathVariable Long friendId) {
-        friendService.deleteAddFriendRequest(friendId);
+    @DeleteMapping("/add-request/{userId}")
+    public ResponseEntity<ApiResponse<String>> deleteAddFriendRequest (@PathVariable Long userId) {
+        friendService.deleteAddFriendRequest(userId);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<String>> deleteFriend (@PathVariable Long userId) {
+        friendService.deleteFriend(userId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 

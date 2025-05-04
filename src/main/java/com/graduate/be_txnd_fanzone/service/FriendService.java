@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -58,10 +57,10 @@ public class FriendService {
         friendRepository.save(friend);
     }
 
-    public void acceptAddFriendRequest(Long friendId) {
-        Friend friend = friendRepository.findByFriendIdAndDeleteFlagIsFalse(friendId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+    public void acceptAddFriendRequest(Long userId) {
         Long userLoginId = securityUtil.getCurrentUserId();
+        Friend friend = friendRepository.getAddFriendByUserIdAndUserLogin((byte) 0, userId, userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
         if (friend.getReceiver().getUserId().equals(userLoginId)) {
             friend.setStatus((byte) 1);
             friendRepository.save(friend);
@@ -70,10 +69,10 @@ public class FriendService {
         }
     }
 
-    public void rejectAddFriendRequest(Long friendId) {
-        Friend friend = friendRepository.findByFriendIdAndDeleteFlagIsFalse(friendId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+    public void rejectAddFriendRequest(Long userId) {
         Long userLoginId = securityUtil.getCurrentUserId();
+        Friend friend = friendRepository.getAddFriendByUserIdAndUserLogin((byte) 0, userId, userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
         if (friend.getReceiver().getUserId().equals(userLoginId)) {
             friendRepository.delete(friend);
         } else {
@@ -81,10 +80,21 @@ public class FriendService {
         }
     }
 
-    public void deleteAddFriendRequest(Long friendId) {
-        Friend friend = friendRepository.findByFriendIdAndDeleteFlagIsFalse(friendId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+    public void deleteAddFriendRequest (Long userId) {
         Long userLoginId = securityUtil.getCurrentUserId();
+        Friend friend = friendRepository.getAddFriendByUserIdAndUserLogin((byte) 0, userId, userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+        if (friend.getSender().getUserId().equals(userLoginId)) {
+            friendRepository.delete(friend);
+        } else {
+            throw new CustomException(ErrorCode.NO_PERMISSION);
+        }
+    }
+
+    public void deleteFriend (Long userId) {
+        Long userLoginId = securityUtil.getCurrentUserId();
+        Friend friend = friendRepository.getAddFriendByUserIdAndUserLogin((byte) 1, userId, userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
         if (friend.getSender().getUserId().equals(userLoginId)) {
             friendRepository.delete(friend);
         } else {

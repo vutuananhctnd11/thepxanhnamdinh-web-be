@@ -20,42 +20,68 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     Page<Friend> findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status, Pageable pageable);
 
+    List<Friend> findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status);
+
     Page<Friend> findAllByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status, Pageable pageable);
+
+    List<Friend> findAllByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status);
 
     long countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(Long userId, Byte status);
 
     long countBySender_UserIdAndStatusAndDeleteFlagIsFalse(Long sender, Byte status);
 
     @Query("""
-    SELECT f FROM Friend f
-    WHERE\s
-        (f.sender.userId = :userId\s
-        AND f.status = :status\s
-        AND f.deleteFlag = false)
-      OR\s
-      (f.receiver.userId = :userId\s
-        AND f.status = :status\s
-        AND f.deleteFlag = false)
-    \s""")
+            SELECT f FROM Friend f
+            WHERE\s
+                (f.sender.userId = :userId\s
+                AND f.status = :status\s
+                AND f.deleteFlag = false)
+              OR\s
+              (f.receiver.userId = :userId\s
+                AND f.status = :status\s
+                AND f.deleteFlag = false)
+            \s""")
     Page<Friend> getListFriends(@Param("userId") Long userId, @Param("status") Byte status, Pageable pageable);
 
     @Query("""
-    SELECT f.friendId FROM Friend f
-    WHERE\s
-        (f.sender.userId = :userId\s
-        AND f.status = 1 \s
-        AND f.deleteFlag = false)
-      OR\s
-      (f.receiver.userId = :userId\s
-        AND f.status = 1 \s
-        AND f.deleteFlag = false)
-    \s""")
-    List<Long> getListFriendIds(@Param("userId") Long userId);
+            SELECT
+                CASE
+                    WHEN f.sender.userId = :userId THEN f.receiver.userId
+                    ELSE f.sender.userId
+                END
+            FROM Friend f
+            WHERE
+                (f.sender.userId = :userId OR f.receiver.userId = :userId)
+                AND f.status = :status
+                AND f.deleteFlag = false
+            """)
+    List<Long> getListFriendIds(@Param("userId") Long userId, @Param("status") Byte status);
+
 
     @Query("SELECT f FROM Friend f " +
-            "WHERE f.status = 1 " +
-            "AND(" +
-            "   (f.sender.userId = :userId1 AND f.receiver.userId = :userId2) " +
-            "OR (f.sender.userId = :userId2 AND f.receiver.userId = :userId1))")
-    Optional<Friend> findAcceptedFriendRelation(Long userId1, Long userId2);
+            "WHERE f.status = :status " +
+            "   AND(" +
+            "       (f.sender.userId = :userId1 AND f.receiver.userId = :userId2) " +
+            "   OR (f.sender.userId = :userId2 AND f.receiver.userId = :userId1))")
+    Optional<Friend> getAddFriendByUserIdAndUserLogin(Byte status, Long userId1, Long userId2);
+
+    @Query("""
+            SELECT f.sender.userId, COUNT(f)
+            FROM Friend f
+            WHERE f.status = 1 
+                AND f.deleteFlag = false 
+                AND f.receiver.userId IN :userIds
+                GROUP BY f.sender.userId
+            UNION
+            SELECT f.receiver.userId, COUNT(f)
+            FROM Friend f
+            WHERE f.status = 1 
+                AND f.deleteFlag = false 
+                AND f.sender.userId IN :userIds
+                GROUP BY f.receiver.userId
+            """)
+    List<Object[]> countFriendsByListUserIds(@Param("userIds") List<Long> userIds);
+
+
+
 }

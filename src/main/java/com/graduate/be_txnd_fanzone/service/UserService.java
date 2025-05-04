@@ -1,5 +1,8 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
+import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
+import com.graduate.be_txnd_fanzone.dto.search.SearchUserResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.enums.RoleEnums;
@@ -21,6 +24,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -114,20 +123,73 @@ public class UserService {
         User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Long userLoginId = securityUtil.getCurrentUserId();
+        PersonalPageResponse response;
 
         if (!Objects.equals(userLoginId, user.getUserId())) {
-            return userMapper.toOtherUserPersonalPageResponse(user);
+            response = userMapper.toOtherUserPersonalPageResponse(user);
+        } else {
+            response = userMapper.toPersonalPageResponse(user);
         }
 
-        PersonalPageResponse response = userMapper.toPersonalPageResponse(user);
-        System.out.println("response.getEmailAddress() = " + response.getEmailAddress());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         response.setDateOfBirth(user.getCreateDate().toLocalDate().format(formatter));
-        response.setTotalFriends(friendRepository.countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 1)
-                + friendRepository.countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 1));
-        response.setTotalPosts(postRepository.countByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(userLoginId));
+        response.setTotalFriends(friendRepository.countByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(user.getUserId(), (byte) 1)
+                + friendRepository.countBySender_UserIdAndStatusAndDeleteFlagIsFalse(user.getUserId(), (byte) 1));
+        response.setTotalPosts(postRepository.countByUser_UserIdAndGroupIsNullAndDeleteFlagIsFalse(user.getUserId()));
         return response;
     }
+
+    public PageableListResponse<SearchUserResponse> searchUsers(SearchRequest request) {
+        PageableListResponse<SearchUserResponse> response = new PageableListResponse<>();
+        Long userLoginId = securityUtil.getCurrentUserId();
+        Pageable pageable = PageRequest.of(request.getPage()-1, request.getLimit());
+        Page<User> userList = userRepository.searchUsers(request.getSearch(), userLoginId, pageable);
+
+        //get list friend ids of user login
+        List<Long> friendIds = friendRepository.getListFriendIds(userLoginId,(byte) 1);
+
+        //get list sent friend requests of user login
+        List<Long> listSentAddFriends = friendRepository.findAllBySender_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 0)
+                .stream().map(friend -> friend.getReceiver().getUserId()).toList();
+        //get list of received friend requests  of user login
+        List<Long> listReceiverAddFriends = friendRepository.findAllByReceiver_UserIdAndStatusAndDeleteFlagIsFalse(userLoginId, (byte) 0)
+                .stream().map(friend -> friend.getSender().getUserId()).toList();
+
+        //get list total friend by userId
+        List<Long> searchFriendIds = userList.getContent().stream().map(User::getUserId).toList();
+        Map<Long, Long> friendCountMap = mapListObjectToMap(friendRepository.countFriendsByListUserIds(searchFriendIds));
+
+        List<SearchUserResponse> users = userList.stream().map(user -> {
+            SearchUserResponse searchUserResponse = userMapper.toSearchUserResponse(user);
+            searchUserResponse.setTotalFriends(friendCountMap.getOrDefault(user.getUserId(), 0L));
+            searchUserResponse.setIsFriend(friendIds.contains(user.getUserId()));
+            Long userId = user.getUserId();
+
+            if (listSentAddFriends.contains(userId)) {
+                searchUserResponse.setIsSentRequest(true);
+                searchUserResponse.setIsSender(true);
+            } else if (listReceiverAddFriends.contains(userId)) {
+                searchUserResponse.setIsSentRequest(true);
+                searchUserResponse.setIsSender(false);
+            } else {
+                searchUserResponse.setIsSentRequest(false);
+            }
+            return searchUserResponse;
+        }).toList();
+        response.setListResults(users);
+        response.setPage(request.getPage());
+        response.setLimit(request.getLimit());
+        response.setTotalPage((long) userList.getTotalPages());
+        return response;
+    }
+
+    // convert list object from repository to Map
+    private Map<Long, Long> mapListObjectToMap(List<Object[]> listObjects) {
+        return listObjects.stream().collect(Collectors.toMap(
+                row -> (Long) row[0], row -> (Long) row[1]
+        ));
+    }
+
 
 
 }

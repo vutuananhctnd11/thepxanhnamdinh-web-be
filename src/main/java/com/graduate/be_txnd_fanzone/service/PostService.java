@@ -183,7 +183,7 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //get list friend id
-        List<Long> friendIds = friendRepository.getListFriendIds(userLoginId);
+        List<Long> friendIds = friendRepository.getListFriendIds(userLoginId,(byte) 1);
         //get list joined group
         List<Long> joinedGroupIds = groupRepository.findGroupIdsByUserId(userLoginId);
         //filter remove post
@@ -256,7 +256,7 @@ public class PostService {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         Long userLoginId = securityUtil.getCurrentUserId();
         boolean isOwner = userLoginId.equals(userId);
-        boolean isFriend = isOwner || friendRepository.findAcceptedFriendRelation(userId, userLoginId).isPresent();
+        boolean isFriend = isOwner || friendRepository.getAddFriendByUserIdAndUserLogin((byte) 1, userId, userLoginId).isPresent();
 
         List<Post> posts;
         if (isFriend) {

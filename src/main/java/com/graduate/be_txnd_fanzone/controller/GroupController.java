@@ -5,6 +5,8 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
+import com.graduate.be_txnd_fanzone.dto.search.SearchGroupResponse;
+import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
 import com.graduate.be_txnd_fanzone.service.GroupService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +70,12 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public ResponseEntity<ApiResponse<GroupResponse>> getGroupById(@PathVariable Long groupId) {
         ApiResponse<GroupResponse> response = new ApiResponse<>(groupService.getGroupById(groupId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<PageableListResponse<SearchGroupResponse>>> searchGroups(@RequestBody SearchRequest request) {
+        ApiResponse<PageableListResponse<SearchGroupResponse>> response = new ApiResponse<>(groupService.searchGroups(request));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

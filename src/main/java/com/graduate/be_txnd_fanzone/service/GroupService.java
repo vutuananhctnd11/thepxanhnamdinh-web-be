@@ -4,15 +4,14 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
+import com.graduate.be_txnd_fanzone.dto.search.SearchGroupResponse;
+import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.GroupMapper;
 import com.graduate.be_txnd_fanzone.model.Group;
-import com.graduate.be_txnd_fanzone.model.GroupMember;
-import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.repository.GroupMemberRepository;
 import com.graduate.be_txnd_fanzone.repository.GroupRepository;
-import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -132,6 +131,29 @@ public class GroupService {
         response.setTotalMembers(groupMemberRepository.countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(groupId));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         response.setCreatedDate(group.getCreateDate().toLocalDate().format(formatter));
+        return response;
+    }
+
+    public PageableListResponse<SearchGroupResponse> searchGroups (SearchRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage()-1, request.getLimit());
+        PageableListResponse<SearchGroupResponse> response = new PageableListResponse<>();
+        Long userLoginId = securityUtil.getCurrentUserId();
+
+        Page<Group> groups = groupRepository.searchGroups(request.getSearch(), pageable);
+        List<Long> groupIds = groups.getContent().stream().map(Group::getGroupId).toList();
+        List<Long> joinedGroupIds = groupRepository.findGroupIdsByUserId(userLoginId);
+        Map<Long, Long> memberOfGroupId = mapListObjectToMap(groupMemberRepository.countMembersForGroupIds(groupIds));
+
+        List<SearchGroupResponse> groupsResponse = groups.getContent().stream().map(group -> {
+            SearchGroupResponse groupResponse = groupMapper.toSearchGroupResponse(group);
+            groupResponse.setTotalMembers(memberOfGroupId.getOrDefault(group.getGroupId(), 0L));
+            groupResponse.setIsJoined(joinedGroupIds.contains(group.getGroupId()));
+            return groupResponse;
+        }).toList();
+        response.setListResults(groupsResponse);
+        response.setPage(request.getPage());
+        response.setLimit(request.getLimit());
+        response.setTotalPage((long) groups.getTotalPages());
         return response;
     }
 
