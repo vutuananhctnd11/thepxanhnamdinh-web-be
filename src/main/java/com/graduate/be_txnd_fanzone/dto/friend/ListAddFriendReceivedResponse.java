@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ListAddFriendReceivedResponse {
 
+
     Long senderId;
     String avatar;
     String fullName;

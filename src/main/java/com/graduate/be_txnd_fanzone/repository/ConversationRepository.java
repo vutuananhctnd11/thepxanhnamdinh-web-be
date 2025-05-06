@@ -10,12 +10,12 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 
     @Query("""
         SELECT c FROM Conversation c
-        JOIN c.members m1
-        JOIN c.members m2
+        JOIN c.members m
         WHERE c.type = 0
-          AND m1.user.userId = :userId1
-          AND m2.user.userId = :userId2
-          AND SIZE(c.members) = 2
+          AND m.user.userId IN (:userId1, :userId2)
+        GROUP BY c
+        HAVING COUNT(DISTINCT m.user.userId) = 2
+           AND SIZE(c.members) = 2
     """)
     Optional<Conversation> findPrivateConversationBetweenUsers(Long userId1, Long userId2);
 }

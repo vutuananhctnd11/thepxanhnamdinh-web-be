@@ -10,8 +10,9 @@ import lombok.experimental.FieldDefaults;
 public class ConversationResponse {
 
     Long id;
+    Long userId;
     String name;
-    String image;
+    String avatar;
     Byte type;
     MessageResponse lastMessage;
 }
