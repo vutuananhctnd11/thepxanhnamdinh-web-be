@@ -19,4 +19,6 @@ public class GroupResponse {
     String avatarImage;
     String createdDate;
     Long totalMembers;
+    //0: not in group, 1: send request join, 2: in group
+    Byte statusMember;
 }

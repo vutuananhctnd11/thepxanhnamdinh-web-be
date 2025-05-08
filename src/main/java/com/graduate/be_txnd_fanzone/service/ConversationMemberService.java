@@ -34,8 +34,4 @@ public class ConversationMemberService {
         conversationMember.setConversation(conversation);
         conversationMemberRepository.save(conversationMember);
     }
-
-    public List<ConversationMember> findByUserId(Long userId) {
-        return conversationMemberRepository.findAllByUser_UserId(userId);
-    }
 }

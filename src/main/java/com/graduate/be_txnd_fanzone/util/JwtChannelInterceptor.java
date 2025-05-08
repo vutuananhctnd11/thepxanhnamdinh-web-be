@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.util;
 
+import com.graduate.be_txnd_fanzone.dto.CustomUserDetails;
 import com.graduate.be_txnd_fanzone.service.CustomUserDetailsService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import java.security.Principal;
 
 @Component
 @RequiredArgsConstructor
@@ -34,9 +37,18 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 String username = jwtUtil.getUsernameFromJwtToken(token);
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 if (jwtUtil.isTokenValid(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    accessor.setUser(authentication);
+//                    UsernamePasswordAuthenticationToken authentication =
+//                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                    accessor.setUser(authentication);
+                    Long userId = ((CustomUserDetails) userDetails).getUserId();
+
+                    Principal principal = new Principal() {
+                        @Override
+                        public String getName() {
+                            return userId.toString();
+                        }
+                    };
+                    accessor.setUser(principal);
                 }
             }
         }

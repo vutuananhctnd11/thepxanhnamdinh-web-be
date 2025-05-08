@@ -11,8 +11,18 @@ public class ConversationResponse {
 
     Long id;
     Long userId;
-    String name;
+    String firstName;
+    String lastName;
     String avatar;
     Byte type;
     MessageResponse lastMessage;
+
+    public ConversationResponse(Long id, Long userId, String firstName, String lastName, String avatar, Byte type) {
+        this.id = id;
+        this.type = type;
+        this.avatar = avatar;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.userId = userId;
+    }
 }

@@ -34,6 +34,18 @@ public class GroupMemberController {
         return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
     }
 
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<String>> deleteGroupMember(@RequestParam Long groupId, @RequestParam Long userId) {
+        groupMemberService.deleteGroupMember(groupId, userId);
+        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+    }
+
+    @DeleteMapping("/join-request")
+    public ResponseEntity<ApiResponse<String>> deleteJoinGroupRequest(@RequestParam Long groupId, @RequestParam Long userId) {
+        groupMemberService.deleteJoinGroupRequest(groupId, userId);
+        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<CheckIsMemberResponse>> isMember (@RequestParam Long userId, @RequestParam Long groupId) {
         ApiResponse<CheckIsMemberResponse> apiResponse = new ApiResponse<>(groupMemberService.isMember(userId, groupId));
@@ -55,4 +67,13 @@ public class GroupMemberController {
                 groupMemberService.getListMember(page, limit, groupId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/list-join-request")
+    public ResponseEntity<ApiResponse<PageableListResponse<GroupMemberResponse>>> getListRequestJoinedGroup (
+            @RequestParam Long groupId, @RequestParam int page, @RequestParam int limit) {
+        ApiResponse<PageableListResponse<GroupMemberResponse>> apiResponse = new ApiResponse<>(
+                groupMemberService.getListRequestJoinedGroup(page, limit, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }

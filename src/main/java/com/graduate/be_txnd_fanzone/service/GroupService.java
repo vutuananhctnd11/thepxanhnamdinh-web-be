@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -115,8 +116,8 @@ public class GroupService {
     public PageableListResponse<GroupResponse> getListGroupsWithUserId(int page, int limit, Long userId) {
         Pageable pageable = PageRequest.of(page-1, limit);
 
-        List<Group> listGroupJoined = groupRepository.findGroupsByUserId(userId, pageable).getContent();
-        Collections.shuffle(listGroupJoined);
+        List<Group> listGroupJoined = new ArrayList<>(groupRepository.findGroupsByUserId(userId, pageable).getContent());
+        if (!listGroupJoined.isEmpty()) Collections.shuffle(listGroupJoined);
         PageableListResponse<GroupResponse> response = new PageableListResponse<>();
         response.setPage(page);
         response.setLimit(limit);
@@ -125,12 +126,23 @@ public class GroupService {
     }
 
     public GroupResponse getGroupById(Long groupId) {
+        Long userLoginId = securityUtil.getCurrentUserId();
         Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
         GroupResponse response = groupMapper.toGroupResponse(group);
         response.setTotalMembers(groupMemberRepository.countByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(groupId));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         response.setCreatedDate(group.getCreateDate().toLocalDate().format(formatter));
+        boolean isSentJoinGroup = groupMemberRepository
+                .findByUser_UserIdAndGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(userLoginId, groupId).isPresent();
+        boolean isMemberOfGroup = groupMemberRepository
+                .findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userLoginId, groupId).isPresent();
+        if (isMemberOfGroup){
+            response.setStatusMember((byte)2);
+        } else {
+            if(isSentJoinGroup) response.setStatusMember((byte)1);
+            else response.setStatusMember((byte)0);
+        }
         return response;
     }
 

@@ -1,8 +1,10 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.conversation.ConversationResponse;
 import com.graduate.be_txnd_fanzone.dto.message.CreateMessageRequest;
+import com.graduate.be_txnd_fanzone.dto.message.MessageResponse;
 import com.graduate.be_txnd_fanzone.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,14 @@ public class ConversationController {
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<ConversationResponse>>> listConversations () {
         ApiResponse<List<ConversationResponse>> apiResponse = new ApiResponse<>(conversationService.getConversation());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("old-message")
+    public ResponseEntity<ApiResponse<PageableListResponse<MessageResponse>>> getOldMessages(@RequestParam int page,
+                                                                                             @RequestParam int limit,
+                                                                                             @RequestParam Long userId) {
+        ApiResponse<PageableListResponse<MessageResponse>> apiResponse = new ApiResponse<>(conversationService.getOldMessages(page, limit, userId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

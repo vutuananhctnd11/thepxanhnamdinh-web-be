@@ -1,25 +1,34 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.conversation.ConversationResponse;
 import com.graduate.be_txnd_fanzone.dto.message.CreateMessageRequest;
+import com.graduate.be_txnd_fanzone.dto.message.MessageResponse;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.ConversationMapper;
+import com.graduate.be_txnd_fanzone.mapper.MessageMapper;
 import com.graduate.be_txnd_fanzone.model.Conversation;
 import com.graduate.be_txnd_fanzone.model.ConversationMember;
 import com.graduate.be_txnd_fanzone.model.Message;
 import com.graduate.be_txnd_fanzone.model.User;
+import com.graduate.be_txnd_fanzone.repository.ConversationMemberRepository;
 import com.graduate.be_txnd_fanzone.repository.ConversationRepository;
+import com.graduate.be_txnd_fanzone.repository.MessageRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -34,24 +43,33 @@ public class ConversationService {
     ConversationMemberService conversationMemberService;
     ConversationMapper conversationMapper;
     UserRepository userRepository;
+    MessageMapper messageMapper;
+    MessageRepository messageRepository;
+    ConversationMemberRepository conversationMemberRepository;
 
     public void sendMessage(@Payload CreateMessageRequest request) {
         Message message = messageService.saveMessage(request);
+        MessageResponse messageResponse = messageMapper.toMessageResponse(message);
+        messageResponse.setCreateAt(message.getCreateAt().format(DateTimeFormatter.ofPattern("HH:mm dd/MM")));
+        messageResponse.setConversationId(request.getConversationId());
 
-        messagingTemplate.convertAndSend("/topic/chat/"+ request.getConversationId(), message);
+        List<ConversationMember> participants =  conversationMemberRepository.findAllByConversation_Id(request.getConversationId());
+        for (ConversationMember participant : participants) {
+            messagingTemplate.convertAndSendToUser(String.valueOf(participant.getUser().getUserId()), "/queue/chat", messageResponse);
+        }
     }
 
-    public void authenticate (Principal principal) {
+    public void authenticate(Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
     }
 
-    public ConversationResponse createConversation (Long userId) {
+    public ConversationResponse createConversation(Long userId) {
         Long userLoginId = securityUtil.getCurrentUserId();
         Conversation conversation = conversationRepository
                 .findPrivateConversationBetweenUsers(userId, userLoginId).orElse(null);
-        User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
+        User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (conversation == null) {
@@ -63,15 +81,35 @@ public class ConversationService {
             conversationMemberService.create(userLoginId, conversation.getId());
         }
         ConversationResponse response = conversationMapper.toConversationResponse(conversation);
-        response.setName(user.getFirstName()+" "+user.getLastName());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
         response.setAvatar(user.getAvatar());
+        response.setUserId(userId);
         return response;
     }
 
-    public List<ConversationResponse> getConversation () {
+    public List<ConversationResponse> getConversation() {
         Long userId = securityUtil.getCurrentUserId();
-        List<ConversationMember> lisConversationMember = conversationMemberService.findByUserId(userId);
-        return lisConversationMember.stream().map(conversationMember
-                -> conversationMapper.toConversationResponse(conversationMember.getConversation())).toList();
+        return conversationRepository.findPrivateConversationsWithUsers(userId);
+    }
+
+    public PageableListResponse<MessageResponse> getOldMessages(int page, int limit, Long userId) {
+        PageableListResponse<MessageResponse> response = new PageableListResponse<>();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        Long userLoginId = securityUtil.getCurrentUserId();
+        Conversation conversation = conversationRepository.findPrivateConversationBetweenUsers(userId, userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        Page<Message> messageList = messageRepository.findByConversation_IdOrderByCreateAtDesc(conversation.getId(), pageable);
+        List<MessageResponse> messageResponses = messageList.getContent().stream().map(message -> {
+            MessageResponse messageResponse = messageMapper.toMessageResponse(message);
+            messageResponse.setCreateAt(message.getCreateAt().format(DateTimeFormatter.ofPattern("HH:mm dd/MM")));
+            return messageResponse;
+        }).toList().reversed();
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) messageList.getTotalPages());
+        response.setListResults(messageResponses);
+        return response;
     }
 }

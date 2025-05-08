@@ -23,7 +23,9 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     @Query("SELECT gm.group.groupId, COUNT(gm) " +
             "FROM GroupMember gm " +
-            "WHERE gm.group.groupId IN :groupIds " +
+            "WHERE " +
+            "   (gm.group.groupId IN :groupIds )" +
+            "   AND gm.approved = true " +
             "GROUP BY gm.group.groupId")
     List<Object[]> countMembersForGroupIds(@Param("groupIds") List<Long> groupIds);
 
@@ -33,6 +35,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     Page<GroupMember> findByGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId, Pageable pageable);
 
+    Optional<GroupMember> findByUser_UserIdAndGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(Long userId, Long groupId);
 
     @Query("SELECT gm " +
             "FROM GroupMember gm " +
@@ -41,5 +44,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
             "ORDER BY gm.memberRole")
     Page<GroupMember> findGroupManager(@Param("groupId") Long groupId, Pageable pageable);
 
-
+    Page<GroupMember> findAllByGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalseOrderByCreateDateDesc(Long groupId, Pageable pageable);
 }

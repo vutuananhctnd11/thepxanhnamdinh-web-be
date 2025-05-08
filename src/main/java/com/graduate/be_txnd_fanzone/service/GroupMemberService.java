@@ -63,6 +63,20 @@ public class GroupMemberService {
         return response;
     }
 
+    public void deleteGroupMember(Long groupId, Long userId) {
+        GroupMember groupMember = groupMemberRepository
+                .findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userId, groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_MEMBER_NOT_FOUND));
+        groupMemberRepository.delete(groupMember);
+    }
+
+    public void deleteJoinGroupRequest(Long groupId, Long userId) {
+        GroupMember groupMember = groupMemberRepository
+                .findByUser_UserIdAndGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(userId, groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_MEMBER_NOT_FOUND));
+        groupMemberRepository.delete(groupMember);
+    }
+
     public void addAdminGroup(String username, Long groupId) {
         User user = userRepository.findByUsernameAndDeleteFlagIsFalse(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -141,5 +155,22 @@ public class GroupMemberService {
         Page<GroupMember> groupMemberPage = groupMemberRepository.findGroupManager(groupId, pageable);
 
         return convertToResponse(page, limit, groupMemberPage);
+    }
+
+    public PageableListResponse<GroupMemberResponse> getListRequestJoinedGroup (int page, int limit, Long groupId) {
+        PageableListResponse<GroupMemberResponse> response = new PageableListResponse<>();
+        Pageable pageable = PageRequest.of(page-1, limit);
+        Page<GroupMember> groupMemberList = groupMemberRepository
+                .findAllByGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalseOrderByCreateDateDesc(groupId, pageable);
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        response.setListResults(groupMemberList.getContent().stream().map(groupMember -> {
+            GroupMemberResponse groupMemberResponse = groupMemberMapper.toGroupMemberResponse(groupMember);
+            groupMemberResponse.setRequestAt(prettyTime.format(groupMember.getCreateDate()));
+            return groupMemberResponse;
+        }).toList());
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) groupMemberList.getTotalPages());
+        return response;
     }
 }
