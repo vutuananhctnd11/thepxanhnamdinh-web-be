@@ -10,9 +10,13 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MessageResponse {
 
+    Long messageId;
     Long conversationId;
     Long senderId;
     String content;
     Byte type;
     String createAt;
+    Long replyToMessageId;
+    String replyToMessageContent;
+    Byte replyToMessageType;
 }

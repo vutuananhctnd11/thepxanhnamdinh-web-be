@@ -44,4 +44,7 @@ public class Club extends BaseModel {
     @OneToMany(mappedBy = "awayClub")
     List<Match> awayMatches;
 
+    @OneToMany(mappedBy = "club")
+    List<Coach> coaches;
+
 }

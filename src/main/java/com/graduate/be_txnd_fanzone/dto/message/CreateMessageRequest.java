@@ -12,4 +12,5 @@ public class CreateMessageRequest {
     Long senderId;
     String content;
     Byte type;
+    Long replyToId;
 }

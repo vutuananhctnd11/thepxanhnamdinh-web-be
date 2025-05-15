@@ -22,7 +22,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     """)
     Optional<Conversation> findPrivateConversationBetweenUsers(Long userId1, Long userId2);
 
-
     @Query("""
     SELECT new com.graduate.be_txnd_fanzone.dto.conversation.ConversationResponse(
         c.id,

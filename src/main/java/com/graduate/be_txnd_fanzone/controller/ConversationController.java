@@ -32,9 +32,15 @@ public class ConversationController {
         conversationService.sendMessage(request);
     }
 
-    @GetMapping
+    @GetMapping("/check-conversation")
     public ResponseEntity<ApiResponse<ConversationResponse>> checkIsExistsConversation (@RequestParam Long userId) {
-        ApiResponse<ConversationResponse> apiResponse = new ApiResponse<>(conversationService.createConversation(userId));
+        ApiResponse<ConversationResponse> apiResponse = new ApiResponse<>(conversationService.checkIsExistsConversation(userId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ConversationResponse>> getConversations (@RequestParam Long conversationId) {
+        ApiResponse<ConversationResponse> apiResponse = new ApiResponse<>(conversationService.getConversationById(conversationId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -47,8 +53,9 @@ public class ConversationController {
     @GetMapping("old-message")
     public ResponseEntity<ApiResponse<PageableListResponse<MessageResponse>>> getOldMessages(@RequestParam int page,
                                                                                              @RequestParam int limit,
-                                                                                             @RequestParam Long userId) {
-        ApiResponse<PageableListResponse<MessageResponse>> apiResponse = new ApiResponse<>(conversationService.getOldMessages(page, limit, userId));
+                                                                                             @RequestParam Long conversationId) {
+        ApiResponse<PageableListResponse<MessageResponse>> apiResponse = new
+                ApiResponse<>(conversationService.getOldMessages(page, limit, conversationId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

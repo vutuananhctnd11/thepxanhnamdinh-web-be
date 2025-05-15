@@ -93,6 +93,17 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/group/censor")
+    public ResponseEntity<ApiResponse<PageableListResponse<NewsFeedResponse>>> getListPostWaitingCensor(@RequestParam int page,
+                                                                                                    @RequestParam int limit,
+                                                                                                    @RequestParam Long groupId) {
+        ApiResponse<PageableListResponse<NewsFeedResponse>> apiResponse = new ApiResponse<>(
+                postService.getListPostWaitCensorByGroupId(page, limit, groupId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+
 
 
 

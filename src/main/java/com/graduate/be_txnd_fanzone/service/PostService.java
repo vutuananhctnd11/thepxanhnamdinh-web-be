@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.ocpsoft.prettytime.PrettyTime;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -258,22 +259,22 @@ public class PostService {
         boolean isOwner = userLoginId.equals(userId);
         boolean isFriend = isOwner || friendRepository.getAddFriendByUserIdAndUserLogin((byte) 1, userId, userLoginId).isPresent();
 
-        List<Post> posts;
+        Page<Post> posts;
         if (isFriend) {
-            posts = postRepository.findAllByUser_UserIdAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable).getContent();
+            posts = postRepository.findAllByUser_UserIdAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, pageable);
         } else {
-            posts = postRepository.findAllByUser_UserIdAndStatusAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, (byte) 1, pageable).getContent();
+            posts = postRepository.findAllByUser_UserIdAndStatusAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(userId, (byte) 1, pageable);
         }
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
-        response.setListResults(convertToListNewsFeedResponse(posts, userId));
+        response.setListResults(convertToListNewsFeedResponse(posts.getContent(), userId));
         response.setPage(page);
         response.setLimit(limit);
-        response.setTotalPage((long) Math.ceil((double) posts.size() / limit));
+        response.setTotalPage((long) posts.getTotalPages());
         return response;
     }
 
     public PageableListResponse<NewsFeedResponse> getListPostByGroupId(int page, int limit, Long groupId) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").ascending());
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
         Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
@@ -290,6 +291,22 @@ public class PostService {
         return response;
 
     }
+
+    public PageableListResponse<NewsFeedResponse> getListPostWaitCensorByGroupId(int page, int limit, Long groupId) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
+        PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
+        Long userLoginId = securityUtil.getCurrentUserId();
+        if (!isAdminOrModeratorGroup(userLoginId, groupId)) {
+            throw new CustomException(ErrorCode.NO_PERMISSION);
+        }
+        Page<Post> listPosts = postRepository.findAllByGroup_GroupIdAndCensorFlagIsFalseAndDeleteFlagIsFalse(groupId, pageable);
+        response.setListResults(convertToListNewsFeedResponse(listPosts.getContent(), userLoginId));
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) listPosts.getTotalPages());
+        return response;
+    }
+
 
 
 }

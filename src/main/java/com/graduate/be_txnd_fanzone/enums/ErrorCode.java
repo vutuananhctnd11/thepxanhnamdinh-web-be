@@ -35,6 +35,7 @@ public enum ErrorCode {
     CMT_NOT_FOUND("Không tìm thấy bình luận phù hợp!", HttpStatus.NOT_FOUND),
     REACTION_NOT_FOUND("Bạn chưa Like bài viết này!", HttpStatus.NOT_FOUND),
     CONVERSATION_NOT_FOUND("Không tìm thấy đoạn chat tương ứng!", HttpStatus.NOT_FOUND),
+    MESSAGE_NOT_FOUND("Không tìm thấy tin nhắn tương ứng!", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

@@ -20,10 +20,12 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Page<Group> findAllByTypeAndDeleteFlagIsTrue(Byte type, Pageable pageable);
 
-    @Query("SELECT g FROM Group g " +
-            "JOIN GroupMember gm ON g.groupId = gm.group.groupId " +
-            "JOIN User u ON gm.user.userId = u.userId " +
-            "WHERE u.userId = :userId")
+    @Query("SELECT g " +
+            "FROM Group g " +
+            "   JOIN GroupMember gm ON g.groupId = gm.group.groupId " +
+            "   JOIN User u ON gm.user.userId = u.userId " +
+            "WHERE u.userId = :userId " +
+            "   AND g.deleteFlag = false")
     Page<Group> findGroupsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     Optional<Group> findGroupsByGroupIdAndDeleteFlagIsFalse(Long groupId);

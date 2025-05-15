@@ -40,4 +40,8 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "sender_id")
     User sender;
+
+    @ManyToOne
+    @JoinColumn(name = "reply_to_id")
+    Message replyTo;
 }

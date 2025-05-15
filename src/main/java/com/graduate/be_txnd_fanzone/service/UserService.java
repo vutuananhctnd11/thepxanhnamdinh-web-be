@@ -55,6 +55,7 @@ public class UserService {
     SecurityUtil securityUtil;
     FriendRepository friendRepository;
     PostRepository postRepository;
+    CloudinaryService cloudinaryService;
 
     public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
 
@@ -81,6 +82,10 @@ public class UserService {
 
         if (!usernameLogin.equals(user.getUsername())) throw new CustomException(ErrorCode.UNAUTHENTICATED);
         user = userMapper.updateUser(user, request);
+
+        if (user.getAvatar() != null && request.getAvatar().isEmpty()) {
+            user.setAvatar(null);
+        }
 
         if (request.getPassword() != null) user.setPassword(passwordEncoder.encode(request.getPassword()));
         UpdateUserResponse response = userMapper.toUpdateUserResponse(user);

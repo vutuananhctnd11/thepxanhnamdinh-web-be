@@ -71,6 +71,9 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedOrigin("http://192.168.1.136:5173");
+        corsConfiguration.addAllowedOrigin("https://ssb4gmlf-5173.asse.devtunnels.ms");
+        corsConfiguration.addAllowedOrigin("https://ssb4gmlf-8080.asse.devtunnels.ms");
         corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
 

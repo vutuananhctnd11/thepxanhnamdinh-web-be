@@ -21,4 +21,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByDeleteFlagIsFalseAndCensorFlagIsTrueOrderByCreateDateDesc ();
 
     Page<Post> findAllByUser_UserIdAndStatusAndCensorFlagIsTrueAndGroupIsNullAndDeleteFlagIsFalse(Long userId, Byte status, Pageable pageable);
+
+    Page<Post> findAllByGroup_GroupIdAndCensorFlagIsFalseAndDeleteFlagIsFalse(Long groupId, Pageable pageable);
 }

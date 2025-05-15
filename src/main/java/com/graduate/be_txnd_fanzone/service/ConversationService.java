@@ -49,11 +49,17 @@ public class ConversationService {
 
     public void sendMessage(@Payload CreateMessageRequest request) {
         Message message = messageService.saveMessage(request);
+
+        if (request.getReplyToId() != null) {
+            Message replyToMessage = messageRepository.findById(request.getReplyToId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
+            message.setReplyTo(replyToMessage);
+            messageRepository.save(message);
+        }
         MessageResponse messageResponse = messageMapper.toMessageResponse(message);
         messageResponse.setCreateAt(message.getCreateAt().format(DateTimeFormatter.ofPattern("HH:mm dd/MM")));
-        messageResponse.setConversationId(request.getConversationId());
-
         List<ConversationMember> participants =  conversationMemberRepository.findAllByConversation_Id(request.getConversationId());
+
         for (ConversationMember participant : participants) {
             messagingTemplate.convertAndSendToUser(String.valueOf(participant.getUser().getUserId()), "/queue/chat", messageResponse);
         }
@@ -65,7 +71,7 @@ public class ConversationService {
         }
     }
 
-    public ConversationResponse createConversation(Long userId) {
+    public ConversationResponse checkIsExistsConversation(Long userId) {
         Long userLoginId = securityUtil.getCurrentUserId();
         Conversation conversation = conversationRepository
                 .findPrivateConversationBetweenUsers(userId, userLoginId).orElse(null);
@@ -88,16 +94,33 @@ public class ConversationService {
         return response;
     }
 
+    public ConversationResponse getConversationById(Long conversationId) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONVERSATION_NOT_FOUND));
+        ConversationResponse response = conversationMapper.toConversationResponse(conversation);
+
+        Long userLoginId = securityUtil.getCurrentUserId();;
+        List<ConversationMember> members = conversation.getMembers();
+        members.forEach(member -> {
+            if (!member.getUser().getUserId().equals(userLoginId)){
+                response.setUserId(member.getUser().getUserId());
+                response.setFirstName(member.getUser().getFirstName());
+                response.setLastName(member.getUser().getLastName());
+                response.setAvatar(member.getUser().getAvatar());
+            }
+        });
+        return response;
+    }
+
     public List<ConversationResponse> getConversation() {
         Long userId = securityUtil.getCurrentUserId();
         return conversationRepository.findPrivateConversationsWithUsers(userId);
     }
 
-    public PageableListResponse<MessageResponse> getOldMessages(int page, int limit, Long userId) {
+    public PageableListResponse<MessageResponse> getOldMessages(int page, int limit, Long conversationId) {
         PageableListResponse<MessageResponse> response = new PageableListResponse<>();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        Long userLoginId = securityUtil.getCurrentUserId();
-        Conversation conversation = conversationRepository.findPrivateConversationBetweenUsers(userId, userLoginId)
+        Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONVERSATION_NOT_FOUND));
 
         Page<Message> messageList = messageRepository.findByConversation_IdOrderByCreateAtDesc(conversation.getId(), pageable);

@@ -11,6 +11,11 @@ public interface MessageMapper {
 
     Message toMessage (CreateMessageRequest request);
 
+    @Mapping(target = "messageId", source = "id")
     @Mapping(target = "senderId", source = "sender.userId")
+    @Mapping(target = "conversationId", source = "conversation.id")
+    @Mapping(target = "replyToMessageId", source = "replyTo.id")
+    @Mapping(target = "replyToMessageContent", source = "replyTo.content")
+    @Mapping(target = "replyToMessageType", source = "replyTo.type")
     MessageResponse toMessageResponse (Message message);
 }

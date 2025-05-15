@@ -44,4 +44,8 @@ public class Coach extends BaseModel {
 
     @Column(name = "position")
     String position;
+
+    @ManyToOne
+    @JoinColumn(name = "club_id")
+    Club club;
 }
