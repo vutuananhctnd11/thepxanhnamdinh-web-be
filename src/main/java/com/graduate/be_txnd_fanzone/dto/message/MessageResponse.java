@@ -13,6 +13,7 @@ public class MessageResponse {
     Long messageId;
     Long conversationId;
     Long senderId;
+    String senderFullName;
     String content;
     Byte type;
     String createAt;

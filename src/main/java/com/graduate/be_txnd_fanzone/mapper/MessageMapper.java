@@ -13,6 +13,7 @@ public interface MessageMapper {
 
     @Mapping(target = "messageId", source = "id")
     @Mapping(target = "senderId", source = "sender.userId")
+    @Mapping(target = "senderFullName",expression = "java(message.getSender().getFirstName() + \" \" + message.getSender().getLastName())")
     @Mapping(target = "conversationId", source = "conversation.id")
     @Mapping(target = "replyToMessageId", source = "replyTo.id")
     @Mapping(target = "replyToMessageContent", source = "replyTo.content")

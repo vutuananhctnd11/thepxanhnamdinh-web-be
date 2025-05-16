@@ -10,6 +10,7 @@ public class CallMessage {
 
     String type;
     Long fromUserId;
+    String fromName;
     Long toUserId;
     String channel;
 }

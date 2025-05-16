@@ -48,14 +48,9 @@ public class AccessToken {
     }
 
     private byte[] pack() {
-        /*
-         * Serialize data to bytes for signing
-         */
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        putString(buffer, appId);
-        putString(buffer, appCertificate);
         putString(buffer, channelName);
         putString(buffer, uid);
         buffer.putInt(salt);
@@ -70,7 +65,6 @@ public class AccessToken {
         buffer.flip();
         byte[] data = new byte[buffer.limit()];
         buffer.get(data);
-
         return data;
     }
 
@@ -87,13 +81,16 @@ public class AccessToken {
     }
 
     public String build() throws Exception {
-        byte[] data = pack();
-        byte[] signing = hmacSha256(appCertificate.getBytes(), data);
+        byte[] content = pack();
+        byte[] signature = hmacSha256(appCertificate.getBytes(), content);
 
-        ByteBuffer buffer = ByteBuffer.allocate(signing.length + data.length);
-        buffer.put(signing);
-        buffer.put(data);
+        ByteBuffer buffer = ByteBuffer.allocate(signature.length + content.length);
+        buffer.put(signature);
+        buffer.put(content);
 
-        return Base64.encodeBase64String(buffer.array());
+        byte[] result = buffer.array();
+        String version = "006"; // version token Agora AccessToken V1
+        // Token = version + appId + base64(signature+content)
+        return version + appId + Base64.encodeBase64String(result);
     }
 }

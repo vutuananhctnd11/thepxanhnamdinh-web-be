@@ -1,15 +1,13 @@
 package com.graduate.be_txnd_fanzone.service;
 
-import com.graduate.be_txnd_fanzone.dto.callVideo.CallRequest;
 import com.graduate.be_txnd_fanzone.util.RtcTokenBuilder;
+import io.agora.media.RtcTokenBuilder2;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +23,11 @@ public class CallVideoService {
     String appCertificate;
 
     public String generateCallToken(String channelName, int uid) {
-        RtcTokenBuilder builder = new RtcTokenBuilder();
-        int expireTime = (int)(System.currentTimeMillis() / 1000) + 3600; // 1h
-
-        return builder.buildTokenWithUid(appId, appCertificate, channelName, uid, RtcTokenBuilder.Role.Role_Publisher, expireTime);
+        int expireTime = (int)(System.currentTimeMillis() / 1000) + 3600;
+        RtcTokenBuilder2 builder = new RtcTokenBuilder2();
+        return builder.buildTokenWithUid(appId, appCertificate, channelName, uid,
+                RtcTokenBuilder2.Role.ROLE_PUBLISHER, 3600, expireTime );
     }
-
 
 
 }
