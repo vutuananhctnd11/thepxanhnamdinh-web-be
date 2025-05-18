@@ -45,4 +45,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     Page<GroupMember> findGroupManager(@Param("groupId") Long groupId, Pageable pageable);
 
     Page<GroupMember> findAllByGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalseOrderByCreateDateDesc(Long groupId, Pageable pageable);
+
 }

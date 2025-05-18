@@ -33,9 +33,6 @@ public class Ticket extends BaseModel {
     @Column(name = "quantity")
     Integer quantity;
 
-    @Column(name = "status", nullable = false)
-    String status;
-
     @ManyToOne
     @JoinColumn(name = "match_id")
     Match match;

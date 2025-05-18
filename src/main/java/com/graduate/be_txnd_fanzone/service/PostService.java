@@ -45,7 +45,7 @@ public class PostService {
     MediaRepository mediaRepository;
 
     @Transactional
-    public CreatePostResponse createPost(CreatePostRequest request) {
+    public NewsFeedResponse createPost(CreatePostRequest request) {
         String usernameLogin = SecurityContextHolder.getContext().getAuthentication().getName();
         User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(usernameLogin)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -74,11 +74,17 @@ public class PostService {
         post.setMedias(medias);
         postRepository.save(post);
 
-        CreatePostResponse response = postMapper.toCreatePostResponse(post);
-        response.setMedia(medias.stream().map(mediaMapper::toMediaResponse).toList());
+        NewsFeedResponse response = postMapper.toNewsFeedResponse(post);
+        PrettyTime prettyTime = new PrettyTime(Locale.forLanguageTag("vi"));
+        response.setSeenAt(prettyTime.format(post.getCreateDate()));
+        response.setMedias(post.getMedias().stream().map(mediaMapper::toMediaResponse).toList());
+        response.setReactCount(0L);
+        response.setCommentCount(0L);
+        response.setLiked(false);
         return response;
     }
 
+    @Transactional
     public UpdatePostResponse updatePost(UpdatePostRequest request) {
         Post postUpdate = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -180,22 +186,31 @@ public class PostService {
 
         //get user login
         Long userLoginId = securityUtil.getCurrentUserId();
-        User user = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //get list friend id
-        List<Long> friendIds = friendRepository.getListFriendIds(userLoginId,(byte) 1);
+        List<Long> acceptedFriendIds = friendRepository.getListFriendIds(userLoginId, (byte) 1);
+        List<Long> pendingFriendIds = friendRepository.getListFriendIds(userLoginId, (byte) 0);
         //get list joined group
         List<Long> joinedGroupIds = groupRepository.findGroupIdsByUserId(userLoginId);
         //filter remove post
         List<Post> filteredPosts = allPosts.stream().filter(post -> {
             Group group = post.getGroup();
-            boolean isFriendPost = friendIds.contains(post.getUser().getUserId());
+            boolean isAcceptedFriend = acceptedFriendIds.contains(post.getUser().getUserId());
+            boolean isPendingFriend = pendingFriendIds.contains(post.getUser().getUserId());
             boolean isPublicPost = post.getStatus() == 1;
+            boolean isFriendOnlyPost = post.getStatus() == 0;
+            boolean canSee;
             boolean isUserPost = post.getUser().getUserId().equals(userLoginId);
             boolean isInGroup = group != null && joinedGroupIds.contains(group.getGroupId());
 
-            return isFriendPost || isPublicPost || isUserPost || isInGroup;
+            if (isAcceptedFriend) {
+                canSee = isPublicPost || isFriendOnlyPost;
+            } else if (isPendingFriend) {
+                canSee = isPublicPost;
+            } else {
+                canSee = false;
+            }
+            return canSee || isUserPost || isInGroup;
         }).collect(Collectors.toList());
 
         int start = (page - 1) * limit;
@@ -307,6 +322,35 @@ public class PostService {
         return response;
     }
 
+    public void rePost(Long postId) {
+        Post originalPost = postRepository.findByPostIdAndDeleteFlagIsFalse(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        Long userLoginId = securityUtil.getCurrentUserId();
+        User userLogin = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Post clonePost = new Post();
+        clonePost.setType((byte) 0);
+        clonePost.setStatus((byte) 1);
+        clonePost.setContent(originalPost.getContent());
+        String content = originalPost.getContent();
+        String authorName = originalPost.getUser().getFirstName() + " " + originalPost.getUser().getLastName();
+
+        if (originalPost.getGroup() != null) {
+            String groupName = originalPost.getGroup().getGroupName();
+            content += "\n\nĐăng lại bài viết của: " + authorName + "\nTrong nhóm: " + groupName;
+        } else {
+            content += "\n\nĐăng lại bài viết của: " + authorName;
+        }
+
+        clonePost.setContent(content);
+        clonePost.setUser(userLogin);
+        postRepository.save(clonePost);
+
+        //set media
+        clonePost.setMedias(mediaService.rePostMedia(originalPost.getMedias(), clonePost));
+        postRepository.save(clonePost);
+    }
 
 }

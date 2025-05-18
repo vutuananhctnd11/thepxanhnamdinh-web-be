@@ -8,15 +8,15 @@ import java.time.LocalDate;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PlayerInfoResponse {
+public class UpdatePlayerRequest {
 
     Long playerId;
     String firstName;
     String lastName;
     String nameInShirt;
     Integer shirtNumber;
-    Integer age;
     LocalDate dateOfBirth;
+    Integer age;
     Float height;
     Integer weight;
     String nationality;

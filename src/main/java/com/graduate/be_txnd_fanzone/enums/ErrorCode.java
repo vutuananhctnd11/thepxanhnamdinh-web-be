@@ -36,6 +36,7 @@ public enum ErrorCode {
     REACTION_NOT_FOUND("Bạn chưa Like bài viết này!", HttpStatus.NOT_FOUND),
     CONVERSATION_NOT_FOUND("Không tìm thấy đoạn chat tương ứng!", HttpStatus.NOT_FOUND),
     MESSAGE_NOT_FOUND("Không tìm thấy tin nhắn tương ứng!", HttpStatus.NOT_FOUND),
+    HEAD_COACH_INVALID("Đã tồn tại HLV trưởng, bạn không thể tạo thêm!", HttpStatus.BAD_REQUEST),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

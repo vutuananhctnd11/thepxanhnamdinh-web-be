@@ -12,8 +12,6 @@ public interface PostMapper {
     @Mapping(target = "reportFlag", constant = "false")
     Post toPost(CreatePostRequest request);
 
-    CreatePostResponse toCreatePostResponse(Post post);
-
     Post updatePost(UpdatePostRequest request, @MappingTarget Post post);
 
     UpdatePostResponse toUpdatePostResponse(Post post);
@@ -24,6 +22,5 @@ public interface PostMapper {
     @Mapping(source = "group.groupId", target = "groupId")
     @Mapping(source = "group.groupName", target = "groupName")
     NewsFeedResponse toNewsFeedResponse(Post post);
-
 
 }

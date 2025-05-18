@@ -2,6 +2,7 @@ package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
+import com.graduate.be_txnd_fanzone.dto.groupMember.ChangeMemberRoleRequest;
 import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
@@ -172,5 +173,13 @@ public class GroupMemberService {
         response.setLimit(limit);
         response.setTotalPage((long) groupMemberList.getTotalPages());
         return response;
+    }
+
+    public void changeMemberRole (ChangeMemberRoleRequest request) {
+        GroupMember groupMember = groupMemberRepository.findByUser_UserIdAndGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(request.getUserId(), request.getGroupId())
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_MEMBER_NOT_FOUND));
+        groupMember.setMemberRole(request.getMemberRole());
+        groupMemberRepository.save(groupMember);
+
     }
 }

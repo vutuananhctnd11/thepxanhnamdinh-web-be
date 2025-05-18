@@ -3,6 +3,7 @@ package com.graduate.be_txnd_fanzone.controller;
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.post.*;
+import com.graduate.be_txnd_fanzone.model.Post;
 import com.graduate.be_txnd_fanzone.service.PostService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,8 @@ public class PostController {
     PostService postService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CreatePostResponse>> createPost(@RequestBody CreatePostRequest request) {
-        ApiResponse<CreatePostResponse> apiResponse = new ApiResponse<>(postService.createPost(request));
+    public ResponseEntity<ApiResponse<NewsFeedResponse>> createPost(@RequestBody CreatePostRequest request) {
+        ApiResponse<NewsFeedResponse> apiResponse = new ApiResponse<>(postService.createPost(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -101,6 +102,13 @@ public class PostController {
                 postService.getListPostWaitCensorByGroupId(page, limit, groupId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/repost")
+    public ResponseEntity<ApiResponse<String>> repostPost(@RequestBody RepostRequest request) {
+        postService.rePost(request.getPostId());
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
+    }
+
 
 
 

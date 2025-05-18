@@ -1,8 +1,7 @@
 package com.graduate.be_txnd_fanzone.service;
 
-import com.graduate.be_txnd_fanzone.dto.player.PlayerInSquadResponse;
-import com.graduate.be_txnd_fanzone.dto.player.PlayerInfoResponse;
-import com.graduate.be_txnd_fanzone.dto.player.SquadResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
+import com.graduate.be_txnd_fanzone.dto.player.*;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.PlayerMapper;
@@ -15,9 +14,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +35,11 @@ public class PlayerService {
     ClubRepository clubRepository;
 
     @NonFinal
-    Club myClub;
-
-    @NonFinal
     Long myClubId;
 
     @PostConstruct
     public void init() {
-        myClub = clubRepository.findByAllowDeleteIsFalse()
+        Club myClub = clubRepository.findByAllowDeleteIsFalse()
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
         myClubId = myClub.getClubId();
     }
@@ -90,5 +93,45 @@ public class PlayerService {
                 .map(PlayerInSquadResponse::getPlayerId)
                 .toList();
     }
+
+    public PageableListResponse<PlayerResponse> getListPlayer (int page, int limit) {
+        PageableListResponse<PlayerResponse> response = new PageableListResponse<>();
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("shirtNumber").ascending());
+        Page<Player> listPlayers = playerRepository.findAllByClub_ClubIdAndDeleteFlagIsFalse(myClubId, pageable);
+        response.setListResults(listPlayers.getContent().stream().map(playerMapper::toPlayerResponse).collect(Collectors.toList()));
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPage((long) listPlayers.getTotalPages());
+        return response;
+    }
+
+    public PlayerResponse createPlayer (CreatePlayerRequest request) {
+        Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+
+        Player player = playerMapper.toPlayer(request);
+        player.setAge((byte) Period.between(player.getDateOfBirth(), LocalDate.now()).getYears());
+        player.setClub(club);
+        playerRepository.save(player);
+
+        return playerMapper.toPlayerResponse(player);
+    }
+
+    public PlayerInfoResponse updatePlayer (UpdatePlayerRequest request) {
+        Player oldPlayer  = playerRepository.findByPlayerIdAndDeleteFlagIsFalse(request.getPlayerId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PLAYER_NOT_FOUND));
+        playerMapper.updatePlayer(request, oldPlayer);
+        playerRepository.save(oldPlayer);
+        return playerMapper.toPlayerInfoResponse(oldPlayer);
+    }
+
+    public void deletePlayer (Long playerId) {
+        Player player = playerRepository.findByPlayerIdAndDeleteFlagIsFalse(playerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PLAYER_NOT_FOUND));
+        player.setDeleteFlag(true);
+        playerRepository.save(player);
+    }
+
+
 
 }

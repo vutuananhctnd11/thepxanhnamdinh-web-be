@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface CoachRepository extends JpaRepository<Coach, Long> {
 
     Optional<Coach> findByPositionIgnoreCase(String position);
+
+    Optional<Coach> findByCoachIdAndDeleteFlagIsFalse(Long coachId);
+
 }

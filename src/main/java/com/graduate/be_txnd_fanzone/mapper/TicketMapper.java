@@ -1,5 +1,6 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
+import com.graduate.be_txnd_fanzone.dto.ticket.CreateTicketInfoRequest;
 import com.graduate.be_txnd_fanzone.dto.ticket.TicketTypeResponse;
 import com.graduate.be_txnd_fanzone.model.Ticket;
 import org.mapstruct.Mapper;
@@ -8,4 +9,6 @@ import org.mapstruct.Mapper;
 public interface TicketMapper {
 
     TicketTypeResponse toTicketTypeResponse(Ticket ticket);
+
+    Ticket toTicket(CreateTicketInfoRequest request);
 }

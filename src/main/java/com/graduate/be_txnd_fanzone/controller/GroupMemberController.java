@@ -3,6 +3,7 @@ package com.graduate.be_txnd_fanzone.controller;
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.AddGroupMemberRequest;
+import com.graduate.be_txnd_fanzone.dto.groupMember.ChangeMemberRoleRequest;
 import com.graduate.be_txnd_fanzone.dto.groupMember.CheckIsMemberResponse;
 import com.graduate.be_txnd_fanzone.dto.groupMember.GroupMemberResponse;
 import com.graduate.be_txnd_fanzone.service.GroupMemberService;
@@ -74,6 +75,12 @@ public class GroupMemberController {
         ApiResponse<PageableListResponse<GroupMemberResponse>> apiResponse = new ApiResponse<>(
                 groupMemberService.getListRequestJoinedGroup(page, limit, groupId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PatchMapping("/change-member-role")
+    public ResponseEntity<ApiResponse<String>> changeMemberRole (@RequestBody ChangeMemberRoleRequest request) {
+        groupMemberService.changeMemberRole(request);
+        return new ResponseEntity<>(new ApiResponse<>(null),HttpStatus.OK);
     }
 
 }

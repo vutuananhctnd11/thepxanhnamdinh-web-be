@@ -1,8 +1,8 @@
 package com.graduate.be_txnd_fanzone.controller;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
-import com.graduate.be_txnd_fanzone.dto.player.PlayerInfoResponse;
-import com.graduate.be_txnd_fanzone.dto.player.SquadResponse;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
+import com.graduate.be_txnd_fanzone.dto.player.*;
 import com.graduate.be_txnd_fanzone.repository.PlayerRepository;
 import com.graduate.be_txnd_fanzone.service.PlayerService;
 import lombok.AccessLevel;
@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/players")
@@ -31,5 +33,30 @@ public class PlayerController {
     public ResponseEntity<ApiResponse<PlayerInfoResponse>> getPlayerInfo(@PathVariable Long playerId){
         ApiResponse<PlayerInfoResponse> apiResponse = new ApiResponse<>(playerService.getPlayerInfo(playerId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<PageableListResponse<PlayerResponse>>> getPlayerInfoList(@RequestParam int page,
+                                                                                               @RequestParam int limit){
+        ApiResponse<PageableListResponse<PlayerResponse>> apiResponse = new ApiResponse<>(playerService.getListPlayer(page, limit));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<PlayerResponse>> createPlayer (@RequestBody CreatePlayerRequest request) {
+        ApiResponse<PlayerResponse> apiResponse = new ApiResponse<>(playerService.createPlayer(request));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<PlayerInfoResponse>> updatePlayer (@RequestBody UpdatePlayerRequest request) {
+        ApiResponse<PlayerInfoResponse> apiResponse =  new ApiResponse<>(playerService.updatePlayer(request));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{playerId}")
+    public ResponseEntity<ApiResponse<String>> deletePlayer (@PathVariable Long playerId){
+        playerService.deletePlayer(playerId);
+        return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 }

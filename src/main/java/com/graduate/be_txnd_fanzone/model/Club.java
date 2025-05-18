@@ -33,7 +33,7 @@ public class Club extends BaseModel {
     String logo;
 
     @Column(name = "allow_delete")
-    Boolean allowDelete = true;
+    Boolean allowDelete;
 
     @OneToMany(mappedBy = "club")
     List<Player> players;
@@ -46,5 +46,10 @@ public class Club extends BaseModel {
 
     @OneToMany(mappedBy = "club")
     List<Coach> coaches;
+
+    @PrePersist
+    protected void onCreate() {
+        allowDelete = true;
+    }
 
 }

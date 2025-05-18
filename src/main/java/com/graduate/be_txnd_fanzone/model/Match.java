@@ -35,6 +35,7 @@ public class Match extends BaseModel {
     @Column(name = "round")
     String round;
 
+    //created, played
     @Column(name = "status")
     String status;
 

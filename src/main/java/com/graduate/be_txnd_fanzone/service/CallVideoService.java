@@ -1,6 +1,5 @@
 package com.graduate.be_txnd_fanzone.service;
 
-import com.graduate.be_txnd_fanzone.util.RtcTokenBuilder;
 import io.agora.media.RtcTokenBuilder2;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

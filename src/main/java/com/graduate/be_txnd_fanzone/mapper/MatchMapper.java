@@ -1,10 +1,13 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
+import com.graduate.be_txnd_fanzone.dto.match.CreateMatchRequest;
 import com.graduate.be_txnd_fanzone.dto.match.MatchInfoResponse;
 import com.graduate.be_txnd_fanzone.dto.match.MatchSellTicketResponse;
+import com.graduate.be_txnd_fanzone.dto.match.UpdateMatchRequest;
 import com.graduate.be_txnd_fanzone.model.Match;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface MatchMapper {
@@ -22,4 +25,9 @@ public interface MatchMapper {
     @Mapping(source = "awayClub.logo", target = "awayLogo")
     @Mapping(source = "homeClub.stadium", target = "stadium")
     MatchSellTicketResponse toMatchSellTicketResponse (Match match);
+
+    Match toMatch (CreateMatchRequest request);
+
+    void updateMatch (@MappingTarget Match match, UpdateMatchRequest request);
+
 }

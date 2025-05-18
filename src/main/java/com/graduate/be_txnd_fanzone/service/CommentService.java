@@ -38,8 +38,8 @@ public class CommentService {
     SimpMessagingTemplate messagingTemplate;
 
     public void createComment(CreateCommentRequest request, Principal principal) {
-        String username = principal.getName();
-        User userComment = userRepository.findByUsernameAndDeleteFlagIsFalse(username)
+        Long userLoginId = Long.valueOf(principal.getName());
+        User userComment = userRepository.findByUserIdAndDeleteFlagIsFalse(userLoginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Post postOfCmt = postRepository.findByPostIdAndDeleteFlagIsFalse(request.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
