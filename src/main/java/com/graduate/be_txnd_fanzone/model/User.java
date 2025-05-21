@@ -73,4 +73,7 @@ public class User extends BaseModel {
     @OneToMany(mappedBy = "user")
     List<Reaction> reactions;
 
+    @OneToMany(mappedBy = "user")
+    List<ReportPost> reportPosts;
+
 }

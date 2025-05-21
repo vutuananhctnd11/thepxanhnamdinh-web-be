@@ -106,8 +106,15 @@ public class PlayerService {
     }
 
     public PlayerResponse createPlayer (CreatePlayerRequest request) {
-        Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        Club club;
+
+        if (request.getClubId() != null) {
+            club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        } else {
+            club = clubRepository.findByAllowDeleteIsFalse()
+                    .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        }
 
         Player player = playerMapper.toPlayer(request);
         player.setAge((byte) Period.between(player.getDateOfBirth(), LocalDate.now()).getYears());
