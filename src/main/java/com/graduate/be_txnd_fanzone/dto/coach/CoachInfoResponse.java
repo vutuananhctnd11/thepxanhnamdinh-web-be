@@ -13,6 +13,7 @@ public class CoachInfoResponse {
     Long coachId;
     String firstName;
     String lastName;
+    String position;
     Integer age;
     LocalDate dateOfBirth;
     String nationality;

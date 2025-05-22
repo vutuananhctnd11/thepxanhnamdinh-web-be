@@ -125,11 +125,12 @@ public class PlayerService {
     }
 
     public PlayerInfoResponse updatePlayer (UpdatePlayerRequest request) {
-        Player oldPlayer  = playerRepository.findByPlayerIdAndDeleteFlagIsFalse(request.getPlayerId())
+        Player player  = playerRepository.findByPlayerIdAndDeleteFlagIsFalse(request.getPlayerId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PLAYER_NOT_FOUND));
-        playerMapper.updatePlayer(request, oldPlayer);
-        playerRepository.save(oldPlayer);
-        return playerMapper.toPlayerInfoResponse(oldPlayer);
+        playerMapper.updatePlayer(request, player);
+        player.setAge((byte) Period.between(player.getDateOfBirth(), LocalDate.now()).getYears());
+        playerRepository.save(player);
+        return playerMapper.toPlayerInfoResponse(player);
     }
 
     public void deletePlayer (Long playerId) {
