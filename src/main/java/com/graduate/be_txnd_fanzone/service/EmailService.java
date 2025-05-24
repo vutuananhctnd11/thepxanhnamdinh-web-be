@@ -52,4 +52,51 @@ public class EmailService {
         }
     }
 
+    public void sendDeleteUserEmail(String to, String userFullName, String userDelete, String emailSupport) {
+        try {
+            Context context = new Context();
+            context.setVariable("userFullName", userFullName);
+            context.setVariable("userDelete", userDelete);
+            context.setVariable("emailSupport", emailSupport);
+
+            String html = templateEngine.process("delete-user-email", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject("[QUAN TRỌNG] Tài khoản TXND FanZone của bạn đã bị xóa!");
+            mimeMessageHelper.setFrom(from);
+            mimeMessageHelper.setText(html, true);
+            mailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.CAN_NOT_SEND_EMAIL);
+        }
+    }
+
+    public void sendCreateUserEmail(String to, String username, String password) {
+        try {
+            Context context = new Context();
+            context.setVariable("username", username);
+            context.setVariable("password", password);
+
+            String html = templateEngine.process("create-user-email", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject("[QUAN TRỌNG] Bạn đã được tạo một tài khoản trên hệ thống TXND FanZone!");
+            mimeMessageHelper.setFrom(from);
+            mimeMessageHelper.setText(html, true);
+            mailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.CAN_NOT_SEND_EMAIL);
+        }
+    }
+
 }

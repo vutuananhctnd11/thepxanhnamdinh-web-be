@@ -1,10 +1,7 @@
 package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
-import com.graduate.be_txnd_fanzone.dto.match.CreateMatchRequest;
-import com.graduate.be_txnd_fanzone.dto.match.MatchInfoResponse;
-import com.graduate.be_txnd_fanzone.dto.match.MatchSellTicketResponse;
-import com.graduate.be_txnd_fanzone.dto.match.UpdateMatchRequest;
+import com.graduate.be_txnd_fanzone.dto.match.*;
 import com.graduate.be_txnd_fanzone.dto.ticket.CreateListTicketRequest;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -47,11 +44,11 @@ public class MatchService {
 
         if (isPlayed) {
             matchLatest = matchRepository
-                    .findFirstByMatchDateBeforeAndStatusAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime.now(),"played")
+                    .findFirstByMatchDateBeforeAndStatusAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime.now(), "played")
                     .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
         } else {
             matchLatest = matchRepository
-                    .findFirstByMatchDateAfterAndStatusAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime.now(),"created")
+                    .findFirstByMatchDateAfterAndStatusAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime.now(), "created")
                     .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
         }
         MatchInfoResponse matchInfoResponse = matchMapper.toMatchInfoResponse(matchLatest);
@@ -83,14 +80,14 @@ public class MatchService {
         return top3Matches.stream().map(matchMapper::toMatchSellTicketResponse).toList();
     }
 
-    public MatchInfoResponse createMatch (CreateMatchRequest request) {
+    public MatchInfoResponse createMatch(CreateMatchRequest request) {
         Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
         Club myClub = clubRepository.findByAllowDeleteIsFalse()
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
         Match match = matchMapper.toMatch(request);
 
-        if (request.getIsHome()){
+        if (request.getIsHome()) {
             match.setHomeClub(myClub);
             match.setAwayClub(club);
         } else {
@@ -98,40 +95,61 @@ public class MatchService {
             match.setHomeClub(club);
         }
         match.setStatus("created");
+        match.setSellTicket(false);
         matchRepository.save(match);
         return matchMapper.toMatchInfoResponse(match);
     }
 
-    public MatchInfoResponse updateMatch (UpdateMatchRequest request) {
+    public UpdateMatchResponse updateMatch(UpdateMatchRequest request) {
         Match match = matchRepository.findByMatchIdAndDeleteFlagIsFalse(request.getMatchId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
         Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
         Club myClub = clubRepository.findByAllowDeleteIsFalse()
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
-        if (request.getIsHome()){
+        matchMapper.updateMatch(match, request);
+        if (request.getIsHome()) {
             match.setHomeClub(myClub);
             match.setAwayClub(club);
         } else {
             match.setAwayClub(myClub);
             match.setHomeClub(club);
         }
-        matchMapper.updateMatch(match, request);
         matchRepository.save(match);
-        return matchMapper.toMatchInfoResponse(match);
+        return convertToUpdateMatchResponse(match, myClub.getClubId());
     }
 
-    public void deleteMatch (Long matchId) {
+    public void deleteMatch(Long matchId) {
         Match match = matchRepository.findByMatchIdAndDeleteFlagIsFalse(matchId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
         match.setDeleteFlag(true);
         matchRepository.save(match);
     }
 
-    public PageableListResponse<MatchInfoResponse> getListMatch (int page, int limit){
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("createDate").descending());
+    public UpdateMatchResponse getMatchByMatchId(Long matchId) {
+        Match match = matchRepository.findByMatchIdAndDeleteFlagIsFalse(matchId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
+        Club myClub = clubRepository.findByAllowDeleteIsFalse()
+                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        return convertToUpdateMatchResponse(match, myClub.getClubId());
+    }
+
+    private UpdateMatchResponse convertToUpdateMatchResponse(Match match, Long myClubId) {
+        UpdateMatchResponse response = matchMapper.toUpdateMatchResponse(match);
+        if (match.getAwayClub().getClubId().equals(myClubId)) {
+            response.setIsHome(false);
+            response.setClubId(match.getHomeClub().getClubId());
+        } else {
+            response.setIsHome(true);
+            response.setClubId(match.getAwayClub().getClubId());
+        }
+        return response;
+    }
+
+    public PageableListResponse<MatchInfoResponse> getListMatch(int page, int limit, String status) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("matchDate").ascending());
         PageableListResponse<MatchInfoResponse> response = new PageableListResponse<>();
-        Page<Match> matches = matchRepository.findAllByDeleteFlagIsFalse(pageable);
+        Page<Match> matches = matchRepository.findByStatusAndDeleteFlagIsFalse(status, pageable);
         List<MatchInfoResponse> matchInfoResponses = matches.getContent().stream().map(matchMapper::toMatchInfoResponse).toList();
         response.setPage(page);
         response.setLimit(limit);
@@ -146,5 +164,20 @@ public class MatchService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
         match.setSellTicket(true);
         matchRepository.save(match);
+    }
+
+    public List<MatchInfoResponse> getListUpdateResultRequest () {
+        List<Match> matches = matchRepository.findMatchesBefore(LocalDateTime.now().plusHours(3));
+        return matches.stream().map(matchMapper::toMatchInfoResponse).collect(Collectors.toList());
+    }
+
+    public MatchInfoResponse updateResultMatch(UpdateResultMatchRequest request) {
+        Match match = matchRepository.findByMatchIdAndDeleteFlagIsFalse(request.getMatchId())
+                .orElseThrow(() -> new CustomException(ErrorCode.MATCH_NOT_FOUND));
+        match.setStatus("played");
+        match.setHomeScore(request.getHomeScore());
+        match.setAwayScore(request.getAwayScore());
+        matchRepository.save(match);
+        return matchMapper.toMatchInfoResponse(match);
     }
 }

@@ -38,7 +38,7 @@ public class CoachService {
     }
 
     public List<CoachShortInfoResponse> getAllCoach() {
-        List<Coach> coachList = coachRepository.findAll();
+        List<Coach> coachList = coachRepository.findAllByDeleteFlagIsFalse();
         return coachList.stream().map(coachMapper::toCoachShortInfoResponse).toList();
     }
 
@@ -67,6 +67,7 @@ public class CoachService {
         Coach coach = coachRepository.findByCoachIdAndDeleteFlagIsFalse(coachId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COACH_NOT_FOUND));
         coach.setDeleteFlag(true);
+        coachRepository.save(coach);
     }
 
     public CoachInfoResponse getCoachInfoById (Long coachId) {

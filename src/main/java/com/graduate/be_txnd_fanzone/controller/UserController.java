@@ -1,11 +1,11 @@
 package com.graduate.be_txnd_fanzone.controller;
 
+import com.cloudinary.Api;
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
 import com.graduate.be_txnd_fanzone.dto.search.SearchUserResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
-import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping("/admin/me")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getAdminLoginInfo () {
         ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -71,5 +71,37 @@ public class UserController {
     public ResponseEntity<ApiResponse<PageableListResponse<SearchUserResponse>>> searchUsers (@RequestBody SearchRequest request) {
         ApiResponse<PageableListResponse<SearchUserResponse>> apiResponse = new ApiResponse<>(userService.searchUsers(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/list-by-role")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<PageableListResponse<UserShortInfoResponse>>> getListUserByRole (@RequestParam int roleId,
+                                                                                                       @RequestParam int page,
+                                                                                                       @RequestParam int limit) {
+        ApiResponse<PageableListResponse<UserShortInfoResponse>> apiResponse = new ApiResponse<>(
+                userService.getListUserByRole(roleId, page, limit));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<PageableListResponse<UserShortInfoResponse>>> getListUser (@RequestParam int page,
+                                                                                                 @RequestParam int limit) {
+        ApiResponse<PageableListResponse<UserShortInfoResponse>> apiResponse = new ApiResponse<>(
+                userService.getListUser(page, limit));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<UserManagementResponse>> getUserManagementInfo (@RequestParam Long userId) {
+        ApiResponse<UserManagementResponse> apiResponse = new ApiResponse<>(userService.getUserManagementInfo(userId));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<UserShortInfoResponse>> createUserByAdmin (@RequestBody AdminCreateUserRequest request) {
+        ApiResponse<UserShortInfoResponse> apiResponse = new ApiResponse<>(userService.createUserByAdmin(request));
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 }

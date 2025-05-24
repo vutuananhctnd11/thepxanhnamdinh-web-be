@@ -16,7 +16,7 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
 
     Optional<Club> findByClubIdAndDeleteFlagIsFalse(Long clubId);
 
-    Page<Club> findAllByAllowDeleteIsTrue(Pageable pageable);
+    Page<Club> findAllByAllowDeleteIsTrueAndDeleteFlagIsFalse(Pageable pageable);
 
-    List<Club> findAllByDeleteFlagIsFalse();
+    List<Club> findAllByAllowDeleteIsTrueAndDeleteFlagIsFalseOrderByClubNameAsc();
 }

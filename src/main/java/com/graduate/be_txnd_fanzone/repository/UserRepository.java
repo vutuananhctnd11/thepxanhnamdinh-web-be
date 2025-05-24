@@ -37,4 +37,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     Page<User> searchUsers(@Param("search") String search, @Param("userLoginId") Long userLoginId, Pageable pageable);
 
+    Page<User> findByRole_IdAndDeleteFlagIsFalseOrderByCreateDateDesc(Integer roleId, Pageable pageable);
+
+    Page<User> findByDeleteFlagIsFalseOrderByCreateDateDesc(Pageable pageable);
+
 }

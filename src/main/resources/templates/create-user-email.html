@@ -1,0 +1,20 @@
+<html lang="en">
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+<div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h2 style="color: #333;">Xin chào <span th:text="${username}"></span>,</h2>
+
+    <p>Bạn đã được tạo tài khoản trên hệ thống <strong>TXND FanZone</strong>.</p>
+
+    <p>Thông tin đăng nhập của bạn:</p>
+
+    <div style="background-color: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin: 20px 0;">
+        <p><strong>Tên đăng nhập:</strong> <span th:text="${username}"></span></p>
+        <p><strong>Mật khẩu:</strong> <span th:text="${password}"></span></p>
+    </div>
+
+    <p>Vui lòng đăng nhập và đổi mật khẩu sau khi đăng nhập lần đầu.</p>
+
+    <p style="margin-top: 40px;">Trân trọng,<br><br> Đội ngũ hỗ trợ TXND FanZone</p>
+</div>
+</body>
+</html>

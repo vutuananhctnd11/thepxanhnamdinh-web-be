@@ -36,4 +36,12 @@ public interface UserMapper {
 
     @Mapping(target = "fullName", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
     SearchUserResponse toSearchUserResponse (User user);
+
+    @Mapping(target = "roleId", source = "role.id")
+    UserShortInfoResponse toUserShortInfoResponse (User user);
+
+    @Mapping(target = "roleId", source = "role.id")
+    UserManagementResponse toUserManagementResponse (User user);
+
+    User toUser (AdminCreateUserRequest request);
 }

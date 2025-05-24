@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ public class PlayerController {
     }
 
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<PageableListResponse<PlayerResponse>>> getPlayerInfoList(@RequestParam int page,
                                                                                                @RequestParam int limit){
         ApiResponse<PageableListResponse<PlayerResponse>> apiResponse = new ApiResponse<>(playerService.getListPlayer(page, limit));
@@ -43,18 +45,21 @@ public class PlayerController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<PlayerResponse>> createPlayer (@RequestBody CreatePlayerRequest request) {
         ApiResponse<PlayerResponse> apiResponse = new ApiResponse<>(playerService.createPlayer(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<PlayerInfoResponse>> updatePlayer (@RequestBody UpdatePlayerRequest request) {
         ApiResponse<PlayerInfoResponse> apiResponse =  new ApiResponse<>(playerService.updatePlayer(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PatchMapping("/{playerId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<String>> deletePlayer (@PathVariable Long playerId){
         playerService.deletePlayer(playerId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);

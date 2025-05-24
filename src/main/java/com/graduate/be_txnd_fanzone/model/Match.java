@@ -39,7 +39,7 @@ public class Match extends BaseModel {
     @Column(name = "status")
     String status;
 
-    @Column(name = "sell_ticket")
+    @Column(name = "sell_ticket", columnDefinition = "boolean")
     Boolean sellTicket;
 
     @ManyToOne

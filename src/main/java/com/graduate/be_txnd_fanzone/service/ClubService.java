@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class ClubService {
 
     public ClubResponse createClub (CreateClubRequest request) {
         Club club = clubMapper.toClub(request);
+        club.setStadium("SVĐ "+request.getStadium());
         clubRepository.save(club);
         return clubMapper.toClubResponse(club);
     }
@@ -39,6 +39,7 @@ public class ClubService {
         Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
         clubMapper.updateCLub(club, request);
+        club.setStadium("SVĐ "+request.getStadium());
         clubRepository.save(club);
         return clubMapper.toClubResponse(club);
     }
@@ -50,12 +51,13 @@ public class ClubService {
             return;
         }
         club.setDeleteFlag(true);
+        clubRepository.save(club);
     }
 
     public PageableListResponse<ClubResponse> getListClub (int page, int limit) {
         PageableListResponse<ClubResponse> response = new PageableListResponse<>();
         Pageable pageable = PageRequest.of(page-1, limit, Sort.by("clubName").ascending());
-        Page<Club> clubs = clubRepository.findAllByAllowDeleteIsTrue(pageable);
+        Page<Club> clubs = clubRepository.findAllByAllowDeleteIsTrueAndDeleteFlagIsFalse(pageable);
         List<ClubResponse> clubResponses = clubs.getContent().stream().map(clubMapper::toClubResponse).toList();
         response.setListResults(clubResponses);
         response.setPage(page);
@@ -70,8 +72,14 @@ public class ClubService {
         return clubMapper.toClubResponse(club);
     }
 
+    public ClubResponse getClubById (Long clubId) {
+        Club club = clubRepository.findByClubIdAndDeleteFlagIsFalse(clubId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        return clubMapper.toClubResponse(club);
+    }
+
     public List<ClubResponse> getListClubToFill () {
-        List<Club> clubs = clubRepository.findAllByDeleteFlagIsFalse();
+        List<Club> clubs = clubRepository.findAllByAllowDeleteIsTrueAndDeleteFlagIsFalseOrderByClubNameAsc();
         return clubs.stream().map(clubMapper::toClubResponse).toList();
     }
 }

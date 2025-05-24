@@ -1,9 +1,6 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
-import com.graduate.be_txnd_fanzone.dto.match.CreateMatchRequest;
-import com.graduate.be_txnd_fanzone.dto.match.MatchInfoResponse;
-import com.graduate.be_txnd_fanzone.dto.match.MatchSellTicketResponse;
-import com.graduate.be_txnd_fanzone.dto.match.UpdateMatchRequest;
+import com.graduate.be_txnd_fanzone.dto.match.*;
 import com.graduate.be_txnd_fanzone.model.Match;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,5 +26,7 @@ public interface MatchMapper {
     Match toMatch (CreateMatchRequest request);
 
     void updateMatch (@MappingTarget Match match, UpdateMatchRequest request);
+
+    UpdateMatchResponse toUpdateMatchResponse (Match match);
 
 }

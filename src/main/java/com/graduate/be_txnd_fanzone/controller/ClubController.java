@@ -37,7 +37,7 @@ public class ClubController {
     }
 
     @PatchMapping("/{clubId}")
-    public ResponseEntity<ApiResponse<String>> deleteClub (@RequestParam Long clubId){
+    public ResponseEntity<ApiResponse<String>> deleteClub (@PathVariable Long clubId){
         clubService.deleteClub(clubId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
@@ -52,6 +52,12 @@ public class ClubController {
     @GetMapping("/my-club")
     public ResponseEntity<ApiResponse<ClubResponse>> getMyClub (){
         ApiResponse<ClubResponse> apiResponse = new ApiResponse<>(clubService.getMyClub());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<ClubResponse>> getClubById (@PathVariable Long clubId){
+        ApiResponse<ClubResponse> apiResponse = new ApiResponse<>(clubService.getClubById(clubId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
