@@ -19,7 +19,7 @@ public class ReportPost extends BaseModel {
     @Column(name = "reason")
     String reason;
 
-    //0: pending, 1: reject, 2: resolved
+    //0: pending, 1: resolved
     @Column(name = "status")
     Byte status;
 

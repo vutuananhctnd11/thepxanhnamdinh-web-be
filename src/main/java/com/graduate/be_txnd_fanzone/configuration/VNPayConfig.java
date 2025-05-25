@@ -3,6 +3,7 @@ package com.graduate.be_txnd_fanzone.configuration;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,8 +19,9 @@ import javax.crypto.spec.SecretKeySpec;
 public class VNPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay/payment-info";
-//    public static String vnp_ReturnUrl = "http://localhost:5173/payment-status";
+//    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay/payment-info";
+    public static String vnp_ReturnUrl = "http://localhost:5173/payment-status";
+    public static String vnp_IpnUrl = "http://localhost:8080/vnpay/payment-info";
     public static String vnp_TmnCode = "I56KYZGK";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
@@ -56,7 +58,8 @@ public class VNPayConfig {
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 sb.append(fieldName);
                 sb.append("=");
-                sb.append(fieldValue);
+//                sb.append(fieldValue);
+                sb.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
             }
             if (itr.hasNext()) {
                 sb.append("&");

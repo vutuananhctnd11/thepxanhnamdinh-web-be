@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.mapper;
 
 import com.graduate.be_txnd_fanzone.dto.group.CreateGroupRequest;
+import com.graduate.be_txnd_fanzone.dto.group.FanGroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.GroupResponse;
 import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.search.SearchGroupResponse;
@@ -20,4 +21,6 @@ public interface GroupMapper {
     Group updateGroup(UpdateGroupRequest request,@MappingTarget Group group);
 
     SearchGroupResponse toSearchGroupResponse(Group group);
+
+    FanGroupResponse toFanGroupResponse(Group group);
 }

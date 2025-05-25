@@ -20,7 +20,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class VnpayService {
 
-    public String createPaymentByVNPay(HttpServletRequest request, long amount) {
+    public String createPaymentByVNPay(HttpServletRequest request, long amount, Long orderTicketId) {
         amount *=100;
 
         String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
@@ -34,7 +34,7 @@ public class VnpayService {
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
         vnp_Params.put("vnp_Locale", "vn");
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + orderTicketId);
         vnp_Params.put("vnp_OrderType", "20");
         vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
         vnp_Params.put("vnp_BankCode", "NCB");
@@ -63,11 +63,11 @@ public class VnpayService {
                 //Build hash data
                 hashData.append(fieldName);
                 hashData.append('=');
-                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
                 //Build query
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8));
                 query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
                 if (itr.hasNext()) {
                     query.append('&');
                     hashData.append('&');
@@ -80,4 +80,5 @@ public class VnpayService {
 
         return VNPayConfig.vnp_PayUrl + "?" + queryUrl;
     }
+
 }

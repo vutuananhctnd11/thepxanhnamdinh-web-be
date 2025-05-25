@@ -41,7 +41,7 @@ public class GroupMemberService {
     public GroupMemberResponse joinGroupRequest(AddGroupMemberRequest request) {
         User user = userRepository.findByUserIdAndDeleteFlagIsFalse(request.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Group group = groupRepository.findByGroupIdAndDeleteFlagIsFalse(request.getGroupId())
+        Group group = groupRepository.findByGroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(request.getGroupId())
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
 
         //check is member
@@ -81,7 +81,7 @@ public class GroupMemberService {
     public void addAdminGroup(String username, Long groupId) {
         User user = userRepository.findByUsernameAndDeleteFlagIsFalse(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Group group = groupRepository.findByGroupIdAndDeleteFlagIsFalse(groupId)
+        Group group = groupRepository.findByGroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
 
         GroupMember groupMember = new GroupMember();

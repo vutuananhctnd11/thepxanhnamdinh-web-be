@@ -68,13 +68,12 @@ public class MatchService {
     public List<MatchSellTicketResponse> getTop3MatchesNearest() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Match> pastMatches = matchRepository.findTop2ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(now);
-        List<Match> futureMatches = matchRepository.findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateDesc(now);
+        List<Match> pastMatches = matchRepository.findTop2ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(now).reversed();
+        List<Match> futureMatches = matchRepository.findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateDesc(now).reversed();
 
         List<Match> combined = new ArrayList<>();
         combined.addAll(pastMatches);
         combined.addAll(futureMatches);
-        combined.sort(Comparator.comparingLong(m -> Math.abs(Duration.between(m.getMatchDate(), now).toMillis())));
 
         List<Match> top3Matches = combined.stream().limit(3).toList();
         return top3Matches.stream().map(matchMapper::toMatchSellTicketResponse).toList();
@@ -146,10 +145,20 @@ public class MatchService {
         return response;
     }
 
-    public PageableListResponse<MatchInfoResponse> getListMatch(int page, int limit, String status) {
+    public PageableListResponse<MatchInfoResponse> getListMatch(int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("matchDate").ascending());
+        Page<Match> matches = matchRepository.findListUpcomingMatches(LocalDateTime.now().plusHours(3), pageable);
+        return convertToPageableMatchInfoResponse(matches, page, limit);
+    }
+
+    public PageableListResponse<MatchInfoResponse> getListMatchResult(int page, int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("matchDate").ascending());
+        Page<Match> matches = matchRepository.findListMatchResults(LocalDateTime.now(), pageable);
+        return convertToPageableMatchInfoResponse(matches, page, limit);
+    }
+
+    private PageableListResponse<MatchInfoResponse> convertToPageableMatchInfoResponse(Page<Match> matches, int page, int limit) {
         PageableListResponse<MatchInfoResponse> response = new PageableListResponse<>();
-        Page<Match> matches = matchRepository.findByStatusAndDeleteFlagIsFalse(status, pageable);
         List<MatchInfoResponse> matchInfoResponses = matches.getContent().stream().map(matchMapper::toMatchInfoResponse).toList();
         response.setPage(page);
         response.setLimit(limit);

@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class OrderTicketService {
     TicketRepository ticketRepository;
     UserRepository userRepository;
     VnpayService vnpayService;
+    EmailService emailService;
 
     @Transactional
     public String orderTicket(ListOrderTicketRequest request, HttpServletRequest httpRequest) {
@@ -81,6 +83,29 @@ public class OrderTicketService {
         orderTicketRepository.save(orderTicket);
 
         //payment
-        return vnpayService.createPaymentByVNPay(httpRequest, totalPrice);
+        return vnpayService.createPaymentByVNPay(httpRequest, totalPrice,orderTicket.getOrderTicketId());
+    }
+
+
+    public void paymentSuccess (Long orderTicketId) throws Exception {
+        OrderTicket orderTicket = orderTicketRepository.findByOrderTicketIdAndDeleteFlagIsFalse(orderTicketId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_TICKET_NOT_FOUND));
+        orderTicket.setStatus("success");
+        orderTicketRepository.save(orderTicket);
+
+        //send email
+        String fullName =orderTicket.getUser().getFirstName() + " "+ orderTicket.getUser().getLastName();
+        LocalDateTime createDate = orderTicket.getCreateDate();
+        List<String> orderTicketDetailIds = orderTicketDetailRepository.getOrderTicketDetailIdsByOrderTicketId(orderTicketId);
+        String email = orderTicket.getUser().getEmailAddress();
+
+        emailService.sendOrderTicketEmail(email, fullName, createDate, orderTicketDetailIds);
+    }
+
+    public void paymentError (Long orderTicketId) {
+        OrderTicket orderTicket = orderTicketRepository.findByOrderTicketIdAndDeleteFlagIsFalse(orderTicketId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_TICKET_NOT_FOUND));
+        orderTicket.setStatus("fail");
+        orderTicketRepository.save(orderTicket);
     }
 }

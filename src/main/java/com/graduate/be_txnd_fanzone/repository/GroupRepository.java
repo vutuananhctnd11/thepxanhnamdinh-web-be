@@ -14,17 +14,20 @@ import java.util.Optional;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
-    Optional<Group> findByGroupIdAndDeleteFlagIsFalse(Long groupId);
+    Optional<Group> findByGroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(Long groupId);
 
-    Page<Group> findAllByDeleteFlagIsFalse(Pageable pageable);
+    Page<Group> findAllByApprovedIsTrueAndDeleteFlagIsFalse(Pageable pageable);
 
-    Page<Group> findAllByTypeAndDeleteFlagIsTrue(Byte type, Pageable pageable);
+    Page<Group> findAllByTypeAndApprovedIsTrueAndDeleteFlagIsTrue(Byte type, Pageable pageable);
+
+    Optional<Group> findByGroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(Long groupId);
 
     @Query("SELECT g " +
             "FROM Group g " +
             "   JOIN GroupMember gm ON g.groupId = gm.group.groupId " +
             "   JOIN User u ON gm.user.userId = u.userId " +
             "WHERE u.userId = :userId " +
+            "   AND g.approved = true" +
             "   AND g.deleteFlag = false")
     Page<Group> findGroupsByUserId(@Param("userId") Long userId, Pageable pageable);
 
@@ -36,6 +39,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
                 JOIN GroupMember gm ON g.groupId = gm.group.groupId
                 JOIN User u ON gm.user.userId = u.userId
             WHERE u.userId = :userId
+                AND g.deleteFlag = false
+                AND g.approved = true
                 AND gm.approved = true
     """)
     List<Long> findGroupIdsByUserId(@Param("userId") Long userId);
@@ -46,7 +51,18 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
             WHERE
                 LOWER(g.groupName) LIKE LOWER(CONCAT('%', :search , '%'))
                 AND g.deleteFlag=false
+                AND g.approved = true
             """)
     Page<Group> searchGroups(@Param("search") String search, Pageable pageable);
+
+    @Query("""
+            SELECT g
+            FROM Group g
+            WHERE
+                g.type = 2
+                AND g.deleteFlag = false
+                AND g.approved = false
+""")
+    Page<Group> findFansGroupRequest(Pageable pageable);
 
 }

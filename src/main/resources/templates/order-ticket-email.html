@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin vé</title>
+</head>
+<body>
+<p>Chào <strong th:text="${fullName}"></strong>,</p>
+<p>Bạn đã đặt vé thành công vào lúc <strong th:text="${createDate}"></strong>.</p>
+
+<p>Thông tin vé của bạn:</p>
+
+<ul>
+    <li th:each="ticketId, iterStat : ${orderTicketDetailIds}">
+        <img th:src="'cid:qrCode_' + ${iterStat.index}" alt="QR Code" width="200" height="200"/>
+    </li>
+</ul>
+</body>
+</html>

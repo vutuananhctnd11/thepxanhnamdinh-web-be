@@ -23,11 +23,30 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     Optional<Match> findByMatchIdAndDeleteFlagIsFalse(Long matchId);
 
-    Page<Match> findByStatusAndDeleteFlagIsFalse(String status, Pageable pageable);
+    @Query("""
+            SELECT m
+            FROM Match m
+            WHERE
+                m.status = 'created'
+                AND m.matchDate > :time
+                And m.deleteFlag = false
+""")
+    Page<Match> findListUpcomingMatches(LocalDateTime time, Pageable pageable);
 
-    @Query("SELECT m FROM Match m " +
-            "WHERE m.matchDate < :thresholdTime " +
+    @Query("""
+            SELECT m
+            FROM Match m
+            WHERE
+                m.status = 'played'
+                AND m.matchDate < :time
+                And m.deleteFlag = false
+""")
+    Page<Match> findListMatchResults(LocalDateTime time,Pageable pageable);
+
+    @Query("SELECT m " +
+            "FROM Match m " +
+            "WHERE m.matchDate < :time " +
             "AND m.status = 'created' " +
             "AND m.deleteFlag = false")
-    List<Match> findMatchesBefore(@Param("thresholdTime") LocalDateTime thresholdTime);
+    List<Match> findMatchesBefore(@Param("time") LocalDateTime time);
 }

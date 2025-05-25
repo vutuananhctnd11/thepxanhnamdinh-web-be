@@ -1,13 +1,17 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.google.zxing.WriterException;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
+import com.graduate.be_txnd_fanzone.util.QRCodeGenerator;
+import io.jsonwebtoken.io.IOException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -98,5 +106,44 @@ public class EmailService {
             throw new CustomException(ErrorCode.CAN_NOT_SEND_EMAIL);
         }
     }
+
+    public void sendOrderTicketEmail(String to, String fullName, LocalDateTime createDate, List<String> orderTicketDetailIds) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("createDate", createDate);
+            context.setVariable("orderTicketDetailIds", orderTicketDetailIds);
+
+            // Chuẩn bị QR codes
+            Map<String, byte[]> qrCodeMap = new HashMap<>();
+            for (int i = 0; i < orderTicketDetailIds.size(); i++) {
+                String cid = "qrCode_" + i;
+                byte[] qrImage = QRCodeGenerator.generateQRCodeImage(orderTicketDetailIds.get(i), 300, 300);
+                qrCodeMap.put(cid, qrImage);
+            }
+
+            String html = templateEngine.process("order-ticket-email", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject("[TXND FanZone] Đặt vé thành công!");
+            mimeMessageHelper.setFrom(from);
+            mimeMessageHelper.setText(html, true);
+
+            for (Map.Entry<String, byte[]> entry : qrCodeMap.entrySet()) {
+                mimeMessageHelper.addInline(entry.getKey(), new ByteArrayResource(entry.getValue()), "image/png");
+            }
+
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.CAN_NOT_SEND_EMAIL);
+        }
+    }
+
+
 
 }

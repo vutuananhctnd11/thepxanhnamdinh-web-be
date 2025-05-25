@@ -37,6 +37,8 @@ public enum ErrorCode {
     CONVERSATION_NOT_FOUND("Không tìm thấy đoạn chat tương ứng!", HttpStatus.NOT_FOUND),
     MESSAGE_NOT_FOUND("Không tìm thấy tin nhắn tương ứng!", HttpStatus.NOT_FOUND),
     HEAD_COACH_INVALID("Đã tồn tại HLV trưởng, bạn không thể tạo thêm!", HttpStatus.BAD_REQUEST),
+    ORDER_TICKET_NOT_FOUND("Không tìm thấy đơn đặt hàng tương ứng!", HttpStatus.NOT_FOUND),
+    REPORT_NOT_FOUND("Không tìm thấy báo cáo vi phạm tương ứng!", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

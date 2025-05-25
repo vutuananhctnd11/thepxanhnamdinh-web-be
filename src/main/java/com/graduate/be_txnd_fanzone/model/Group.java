@@ -28,6 +28,9 @@ public class Group extends BaseModel {
     @Column(name = "group_type")
     Byte type;
 
+    @Column(name = "is_approved")
+    Boolean approved;
+
     @Column(name = "censor_post", columnDefinition = "boolean")
     Boolean censorPost;
 

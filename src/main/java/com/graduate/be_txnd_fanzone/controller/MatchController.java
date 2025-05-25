@@ -63,8 +63,7 @@ public class MatchController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<PageableListResponse<MatchInfoResponse>>> getMatchList (@RequestParam int page,
                                                                                               @RequestParam int limit) {
-        ApiResponse<PageableListResponse<MatchInfoResponse>> apiResponse = new ApiResponse<>(
-                matchService.getListMatch(page, limit, "created"));
+        ApiResponse<PageableListResponse<MatchInfoResponse>> apiResponse = new ApiResponse<>(matchService.getListMatch(page, limit));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -72,8 +71,7 @@ public class MatchController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<PageableListResponse<MatchInfoResponse>>> getResultList (@RequestParam int page,
                                                                                               @RequestParam int limit) {
-        ApiResponse<PageableListResponse<MatchInfoResponse>> apiResponse = new ApiResponse<>(
-                matchService.getListMatch(page, limit, "played"));
+        ApiResponse<PageableListResponse<MatchInfoResponse>> apiResponse = new ApiResponse<>(matchService.getListMatchResult(page, limit));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
