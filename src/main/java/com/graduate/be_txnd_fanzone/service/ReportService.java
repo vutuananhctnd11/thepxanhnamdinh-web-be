@@ -46,6 +46,7 @@ public class ReportService {
         Page<ReportPost> reports = reportRepository.findByStatus((byte) 0, pageable);
         response.setPage(page);
         response.setLimit(limit);
+        response.setTotalPage((long) reports.getTotalPages());
         response.setListResults(reports.getContent().stream().map(reportPost -> {
             ReportResponse reportResponse = reportMapper.toReportResponse(reportPost);
             Post post = reportPost.getPost();

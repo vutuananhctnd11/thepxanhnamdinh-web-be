@@ -56,8 +56,8 @@ public class UserController {
 
     @GetMapping("/admin/me")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getAdminLoginInfo () {
-        ApiResponse<UserInfoResponse> apiResponse = new ApiResponse<>(userService.getUserLoginInfo());
+    public ResponseEntity<ApiResponse<AdminInfoResponse>> getAdminLoginInfo () {
+        ApiResponse<AdminInfoResponse> apiResponse = new ApiResponse<>(userService.getAdminLoginInfo());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

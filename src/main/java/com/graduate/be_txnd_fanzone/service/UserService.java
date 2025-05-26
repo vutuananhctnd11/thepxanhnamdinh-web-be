@@ -117,6 +117,13 @@ public class UserService {
         return userMapper.toUserInfoResponse(userLogin);
     }
 
+    public AdminInfoResponse getAdminLoginInfo() {
+        String usernameLogin = SecurityContextHolder.getContext().getAuthentication().getName();
+        User userLogin = userRepository.findByUsernameAndDeleteFlagIsFalse(usernameLogin).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toAdminInfoResponse(userLogin);
+    }
+
     public void forgotPassword(String identifier, HttpServletResponse response) {
         User user = userRepository.findByUsernameAndDeleteFlagIsFalse(identifier)
                 .orElseGet(() -> userRepository.findByEmailAddressAndDeleteFlagIsFalse(identifier)
@@ -256,6 +263,7 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(randomPassword));
             emailService.sendCreateUserEmail(email, username, randomPassword);
         } else {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
             emailService.sendCreateUserEmail(email, username, request.getPassword());
         }
         userRepository.save(user);

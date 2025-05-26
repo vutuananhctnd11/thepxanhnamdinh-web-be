@@ -1,4 +1,4 @@
-package com.graduate.be_txnd_fanzone.dto.group;
+package com.graduate.be_txnd_fanzone.dto.orderTicket;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -8,12 +8,11 @@ import java.time.LocalDateTime;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FanGroupResponse {
+public class OrderTicketHistoryResponse {
 
-    Long groupId;
-    String groupName;
-    String avatarImage;
+    Long orderTicketId;
     LocalDateTime createDate;
-    String createBy;
-    String fullName;
+    String status;
+    Integer totalTicket;
+    Long totalPrice;
 }

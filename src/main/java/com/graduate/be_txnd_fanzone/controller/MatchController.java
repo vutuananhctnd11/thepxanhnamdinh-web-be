@@ -82,7 +82,7 @@ public class MatchController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PatchMapping("/open-sell-ticket")
+    @PostMapping("/open-sell-ticket")
     public ResponseEntity<ApiResponse<String>> openSellTicket (@RequestBody CreateListTicketRequest request) {
         matchService.openSellTicket(request);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
@@ -99,4 +99,12 @@ public class MatchController {
         ApiResponse<MatchInfoResponse> apiResponse = new ApiResponse<>(matchService.updateResultMatch(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @GetMapping("list-home-match")
+    public ResponseEntity<ApiResponse<PageableListResponse<MatchInfoResponse>>> getListHomeMatch() {
+        ApiResponse<PageableListResponse<MatchInfoResponse>> apiResponse = new ApiResponse<>(matchService.getListHomeMatch());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
 }

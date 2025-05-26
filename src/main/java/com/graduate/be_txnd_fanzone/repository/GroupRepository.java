@@ -18,7 +18,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Page<Group> findAllByApprovedIsTrueAndDeleteFlagIsFalse(Pageable pageable);
 
-    Page<Group> findAllByTypeAndApprovedIsTrueAndDeleteFlagIsTrue(Byte type, Pageable pageable);
+    Page<Group> findAllByTypeAndApprovedIsTrueAndDeleteFlagIsFalse(Byte type, Pageable pageable);
 
     Optional<Group> findByGroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(Long groupId);
 

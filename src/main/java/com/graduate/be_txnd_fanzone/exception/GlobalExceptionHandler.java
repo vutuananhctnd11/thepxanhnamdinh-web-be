@@ -2,6 +2,7 @@ package com.graduate.be_txnd_fanzone.exception;
 
 import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
+import jakarta.persistence.LockTimeoutException;
 import jakarta.servlet.ServletException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,12 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiResponse<?>> handleServletException(ServletException exception) {
         ApiResponse<?> apiResponse = new ApiResponse<>("error", exception.getMessage());
         return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = LockTimeoutException.class)
+    ResponseEntity<ApiResponse<?>> handleLockTimeoutException(LockTimeoutException exception) {
+        ApiResponse<?> apiResponse = new ApiResponse<>(
+                "error", "Hệ thống đang xử lý một giao dịch khác, vui lòng thử lại!\n"+exception.getMessage());
+        return new ResponseEntity<>(apiResponse, HttpStatus.LOCKED);
     }
 }

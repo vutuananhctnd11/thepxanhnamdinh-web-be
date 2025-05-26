@@ -44,4 +44,7 @@ public interface UserMapper {
     UserManagementResponse toUserManagementResponse (User user);
 
     User toUser (AdminCreateUserRequest request);
+
+    @Mapping(target = "roleId", source = "role.id")
+    AdminInfoResponse toAdminInfoResponse (User user);
 }

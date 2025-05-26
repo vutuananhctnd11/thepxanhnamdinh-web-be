@@ -11,8 +11,10 @@ import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
 import com.graduate.be_txnd_fanzone.mapper.GroupMapper;
 import com.graduate.be_txnd_fanzone.model.Group;
+import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.repository.GroupMemberRepository;
 import com.graduate.be_txnd_fanzone.repository.GroupRepository;
+import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class GroupService {
     GroupMemberService groupMemberService;
     SecurityUtil securityUtil;
     GroupMemberRepository groupMemberRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public GroupResponse createGroup(CreateGroupRequest request) {
@@ -54,16 +57,16 @@ public class GroupService {
         return groupMapper.toGroupResponse(group);
     }
 
-    public GroupResponse updateGroup (UpdateGroupRequest request) {
+    public GroupResponse updateGroup(UpdateGroupRequest request) {
         Long userLoginId = securityUtil.getCurrentUserId();
         boolean isAdminGroup = groupMemberRepository
                 .existsByUser_UserIdAndGroup_GroupIdAndMemberRoleAndDeleteFlagIsFalse(userLoginId, request.getGroupId(), (byte) 2);
-        if ( !isAdminGroup) {
+        if (!isAdminGroup) {
             throw new CustomException(ErrorCode.NO_PERMISSION);
         }
         Group groupUpdate = groupRepository.findByGroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(request.getGroupId())
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
-        groupUpdate = groupMapper.updateGroup(request,groupUpdate);
+        groupUpdate = groupMapper.updateGroup(request, groupUpdate);
         groupRepository.save(groupUpdate);
         return groupMapper.toGroupResponse(groupUpdate);
     }
@@ -76,7 +79,7 @@ public class GroupService {
     }
 
     public PageableListResponse<GroupResponse> getAllGroups(int page, int limit) {
-        Pageable pageable = PageRequest.of(page-1, limit);
+        Pageable pageable = PageRequest.of(page - 1, limit);
         List<Group> groups = groupRepository.findAllByApprovedIsTrueAndDeleteFlagIsFalse(pageable).getContent();
         PageableListResponse<GroupResponse> response = new PageableListResponse<>();
         response.setPage(page);
@@ -107,8 +110,8 @@ public class GroupService {
     }
 
     public PageableListResponse<GroupResponse> getListGroupsWithType(int page, int limit, Byte type) {
-        Pageable pageable = PageRequest.of(page-1, limit);
-        List<Group> groups = groupRepository.findAllByTypeAndApprovedIsTrueAndDeleteFlagIsTrue(type, pageable).getContent();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Group> groups = groupRepository.findAllByTypeAndApprovedIsTrueAndDeleteFlagIsFalse(type, pageable).getContent();
         PageableListResponse<GroupResponse> response = new PageableListResponse<>();
         response.setPage(page);
         response.setLimit(limit);
@@ -117,7 +120,7 @@ public class GroupService {
     }
 
     public PageableListResponse<GroupResponse> getListGroupsWithUserId(int page, int limit, Long userId) {
-        Pageable pageable = PageRequest.of(page-1, limit);
+        Pageable pageable = PageRequest.of(page - 1, limit);
 
         List<Group> listGroupJoined = new ArrayList<>(groupRepository.findGroupsByUserId(userId, pageable).getContent());
         if (!listGroupJoined.isEmpty()) Collections.shuffle(listGroupJoined);
@@ -140,17 +143,17 @@ public class GroupService {
                 .findByUser_UserIdAndGroup_GroupIdAndApprovedIsFalseAndDeleteFlagIsFalse(userLoginId, groupId).isPresent();
         boolean isMemberOfGroup = groupMemberRepository
                 .findByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userLoginId, groupId).isPresent();
-        if (isMemberOfGroup){
-            response.setStatusMember((byte)2);
+        if (isMemberOfGroup) {
+            response.setStatusMember((byte) 2);
         } else {
-            if(isSentJoinGroup) response.setStatusMember((byte)1);
-            else response.setStatusMember((byte)0);
+            if (isSentJoinGroup) response.setStatusMember((byte) 1);
+            else response.setStatusMember((byte) 0);
         }
         return response;
     }
 
-    public PageableListResponse<SearchGroupResponse> searchGroups (SearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPage()-1, request.getLimit());
+    public PageableListResponse<SearchGroupResponse> searchGroups(SearchRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getLimit());
         PageableListResponse<SearchGroupResponse> response = new PageableListResponse<>();
         Long userLoginId = securityUtil.getCurrentUserId();
 
@@ -172,24 +175,30 @@ public class GroupService {
         return response;
     }
 
-    public PageableListResponse<FanGroupResponse> getListFanGroup(int page,int limit) {
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
-        Page<Group> groups = groupRepository.findAllByTypeAndApprovedIsTrueAndDeleteFlagIsTrue((byte) 2, pageable);
+    public PageableListResponse<FanGroupResponse> getListFanGroup(int page, int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
+        Page<Group> groups = groupRepository.findAllByTypeAndApprovedIsTrueAndDeleteFlagIsFalse((byte) 2, pageable);
         return convertToPageableFanGroupResponse(groups, page, limit);
     }
 
-    public PageableListResponse<FanGroupResponse> getListCreateFansRequest (int page, int limit){
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createDate").descending());
+    public PageableListResponse<FanGroupResponse> getListCreateFansRequest(int page, int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         Page<Group> groups = groupRepository.findFansGroupRequest(pageable);
         return convertToPageableFanGroupResponse(groups, page, limit);
     }
 
-    private PageableListResponse<FanGroupResponse> convertToPageableFanGroupResponse (Page<Group> groups, int page, int limit){
+    private PageableListResponse<FanGroupResponse> convertToPageableFanGroupResponse(Page<Group> groups, int page, int limit) {
         PageableListResponse<FanGroupResponse> response = new PageableListResponse<>();
         response.setPage(page);
         response.setLimit(limit);
         response.setTotalPage((long) groups.getTotalPages());
-        response.setListResults(groups.getContent().stream().map(groupMapper::toFanGroupResponse).collect(Collectors.toList()));
+        response.setListResults(groups.getContent().stream().map(group -> {
+            FanGroupResponse fanGroupResponse = groupMapper.toFanGroupResponse(group);
+            User user = userRepository.findByUsernameAndDeleteFlagIsFalse(group.getCreateBy())
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            fanGroupResponse.setFullName(user.getFirstName() + " " + user.getLastName());
+            return fanGroupResponse;
+        }).collect(Collectors.toList()));
         return response;
     }
 

@@ -2,6 +2,7 @@ package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.CustomUserDetails;
 import com.graduate.be_txnd_fanzone.dto.orderTicket.ListOrderTicketRequest;
+import com.graduate.be_txnd_fanzone.dto.orderTicket.OrderTicketHistoryResponse;
 import com.graduate.be_txnd_fanzone.dto.orderTicket.OrderTicketInfoRequest;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
@@ -55,7 +56,7 @@ public class OrderTicketService {
         List<OrderTicketInfoRequest> listTickets = request.getListOrderTickets();
 
         for (OrderTicketInfoRequest orderTicketInfoRequest : listTickets) {
-            Ticket ticket = ticketRepository.findById(orderTicketInfoRequest.getTicketId())
+            Ticket ticket = ticketRepository.findByIdForUpdate(orderTicketInfoRequest.getTicketId())
                     .orElseThrow(() -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 
             int numberOfTicket = orderTicketInfoRequest.getQuantity();
@@ -107,5 +108,9 @@ public class OrderTicketService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_TICKET_NOT_FOUND));
         orderTicket.setStatus("fail");
         orderTicketRepository.save(orderTicket);
+    }
+
+    public OrderTicketHistoryResponse getOrderTicketHistory() {
+        return null;
     }
 }

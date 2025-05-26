@@ -15,19 +15,19 @@ import com.graduate.be_txnd_fanzone.repository.PlayerRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -68,15 +68,14 @@ public class MatchService {
     public List<MatchSellTicketResponse> getTop3MatchesNearest() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Match> pastMatches = matchRepository.findTop2ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(now).reversed();
-        List<Match> futureMatches = matchRepository.findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateDesc(now).reversed();
+        List<Match> pastMatches = matchRepository.findTop1ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(now).reversed();
+        List<Match> futureMatches = matchRepository.findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateAsc(now);
 
         List<Match> combined = new ArrayList<>();
         combined.addAll(pastMatches);
         combined.addAll(futureMatches);
 
-        List<Match> top3Matches = combined.stream().limit(3).toList();
-        return top3Matches.stream().map(matchMapper::toMatchSellTicketResponse).toList();
+        return combined.stream().map(matchMapper::toMatchSellTicketResponse).toList();
     }
 
     public MatchInfoResponse createMatch(CreateMatchRequest request) {
@@ -188,5 +187,13 @@ public class MatchService {
         match.setAwayScore(request.getAwayScore());
         matchRepository.save(match);
         return matchMapper.toMatchInfoResponse(match);
+    }
+
+    public PageableListResponse<MatchInfoResponse> getListHomeMatch() {
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("matchDate").ascending());
+        Club myClub = clubRepository.findByAllowDeleteIsFalse().orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+        log.info("myClub: " + myClub.getClubId());
+        Page<Match> matches = matchRepository.findListHomeMatch(myClub.getClubId(), pageable);
+        return convertToPageableMatchInfoResponse(matches, 0, 3);
     }
 }

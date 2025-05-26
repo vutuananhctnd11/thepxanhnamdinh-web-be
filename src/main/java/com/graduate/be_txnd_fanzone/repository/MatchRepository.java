@@ -17,9 +17,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     Optional<Match> findFirstByMatchDateAfterAndStatusAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime matchDate, String status);
 
-    List<Match> findTop2ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(LocalDateTime matchDate);
+    List<Match> findTop1ByMatchDateBeforeAndDeleteFlagIsFalseOrderByMatchDateDesc(LocalDateTime matchDate);
 
-    List<Match> findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateDesc(LocalDateTime matchDate);
+    List<Match> findTop2ByMatchDateAfterAndDeleteFlagIsFalseOrderByMatchDateAsc(LocalDateTime matchDate);
 
     Optional<Match> findByMatchIdAndDeleteFlagIsFalse(Long matchId);
 
@@ -49,4 +49,16 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             "AND m.status = 'created' " +
             "AND m.deleteFlag = false")
     List<Match> findMatchesBefore(@Param("time") LocalDateTime time);
+
+    @Query("""
+            SELECT m
+            FROM Match m
+            WHERE
+                m.homeClub.clubId = :myClubId
+                AND m.status LIKE '%created%'
+                AND m.matchDate > CURRENT_DATE
+                AND m.sellTicket = false
+                AND m.deleteFlag = false
+    """)
+    Page<Match> findListHomeMatch(@Param("myClubId") Long myClubId, Pageable pageable);
 }

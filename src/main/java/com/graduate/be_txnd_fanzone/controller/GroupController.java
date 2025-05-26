@@ -82,20 +82,28 @@ public class GroupController {
     }
 
     @GetMapping("/list-fan-group")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN, ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ApiResponse<PageableListResponse<FanGroupResponse>>> getFanGroups(@RequestParam int page,
                                                                                             @RequestParam int limit) {
         ApiResponse<PageableListResponse<FanGroupResponse>> response = new ApiResponse<>(groupService.getListFanGroup(page, limit));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping("/approve-fan group/{groupId}")
+    @GetMapping("/create-fan-group-request")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse<PageableListResponse<FanGroupResponse>>> getCreateFanGroupRequest(@RequestParam int page,
+                                                                                            @RequestParam int limit) {
+        ApiResponse<PageableListResponse<FanGroupResponse>> response = new ApiResponse<>(groupService.getListCreateFansRequest(page, limit));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/approve-fan-group/{groupId}")
     public ResponseEntity<ApiResponse<String>> approveFanGroup(@PathVariable Long groupId) {
         groupService.approveFanGroupRequest(groupId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
 
-    @PatchMapping("/reject-fan group/{groupId}")
+    @PatchMapping("/reject-fan-group/{groupId}")
     public ResponseEntity<ApiResponse<String>> rejectFanGroup(@PathVariable Long groupId) {
         groupService.rejectFanGroupRequest(groupId);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
