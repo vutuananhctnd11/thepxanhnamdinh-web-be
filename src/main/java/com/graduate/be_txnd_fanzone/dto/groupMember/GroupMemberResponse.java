@@ -12,6 +12,7 @@ public class GroupMemberResponse {
     Long userId;
     String firstName;
     String lastName;
+    String avatar;
     Byte memberRole;
     Long groupId;
     String groupName;

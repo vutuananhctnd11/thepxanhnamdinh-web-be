@@ -195,22 +195,27 @@ public class PostService {
         //filter remove post
         List<Post> filteredPosts = allPosts.stream().filter(post -> {
             Group group = post.getGroup();
+            Long postUserId = post.getUser().getUserId();
+            boolean isUserPost = postUserId.equals(userLoginId);
+
+            if(isUserPost) return true;
+
+            if(group !=null) {
+                return joinedGroupIds.contains(group.getGroupId());
+            }
+
             boolean isAcceptedFriend = acceptedFriendIds.contains(post.getUser().getUserId());
             boolean isPendingFriend = pendingFriendIds.contains(post.getUser().getUserId());
             boolean isPublicPost = post.getStatus() == 1;
             boolean isFriendOnlyPost = post.getStatus() == 0;
-            boolean canSee;
-            boolean isUserPost = post.getUser().getUserId().equals(userLoginId);
-            boolean isInGroup = group != null && joinedGroupIds.contains(group.getGroupId());
 
             if (isAcceptedFriend) {
-                canSee = isPublicPost || isFriendOnlyPost;
+                return isPublicPost || isFriendOnlyPost;
             } else if (isPendingFriend) {
-                canSee = isPublicPost;
+                return isPublicPost;
             } else {
-                canSee = false;
+                return false;
             }
-            return canSee || isUserPost || isInGroup;
         }).collect(Collectors.toList());
 
         int start = (page - 1) * limit;
@@ -289,11 +294,13 @@ public class PostService {
     }
 
     public PageableListResponse<NewsFeedResponse> getListPostByGroupId(int page, int limit, Long groupId) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").ascending());
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createDate").descending());
         PageableListResponse<NewsFeedResponse> response = new PageableListResponse<>();
         Group group = groupRepository.findGroupsByGroupIdAndDeleteFlagIsFalse(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
-        if (group.getType() != 1) {
+        Long userLoginId = securityUtil.getCurrentUserId();
+        boolean isMember = groupMemberRepository.existsByUser_UserIdAndGroup_GroupIdAndApprovedIsTrueAndDeleteFlagIsFalse(userLoginId, groupId);
+        if (!isMember && group.getType() != 1) {
             response.setListResults(new ArrayList<>());
             return response;
         }

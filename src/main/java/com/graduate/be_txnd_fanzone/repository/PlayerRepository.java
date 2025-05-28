@@ -27,4 +27,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     Page<Player> findAllByClub_ClubIdAndDeleteFlagIsFalse(Long playerId, Pageable pageable);
 
+    boolean existsByShirtNumberAndDeleteFlagIsFalse(Integer shirtNumber);
+
 }

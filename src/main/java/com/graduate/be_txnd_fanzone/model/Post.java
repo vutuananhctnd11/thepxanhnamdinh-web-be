@@ -18,7 +18,7 @@ public class Post extends BaseModel {
     @Column(name = "post_id", nullable = false)
     Long postId;
 
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "text")
     String content;
 
     //0: in personal page, 1: in group

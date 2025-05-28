@@ -14,6 +14,7 @@ public interface GroupMemberMapper {
     @Mapping(target = "userId", source = "user.userId")
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "avatar", source = "user.avatar")
     @Mapping(target = "groupId", source = "group.groupId")
     @Mapping(target = "groupName", source = "group.groupName")
     GroupMemberResponse toGroupMemberResponse(GroupMember groupMember);

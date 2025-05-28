@@ -18,6 +18,7 @@ public enum ErrorCode {
     EMAIL_EXISTED ("Đã tồn tại email trong hệ thống!", HttpStatus.BAD_REQUEST),
     UPLOAD_FAILED ("Lỗi upload file!", HttpStatus.INTERNAL_SERVER_ERROR),
     PLAYER_NOT_FOUND ("Không tìm thấy cầu thủ phù hợp!", HttpStatus.NOT_FOUND),
+    SHIRT_NUMBER_INVALID("Số áo đăng ký đã có người mặc vui lòng chọn số áo khác!", HttpStatus.NOT_FOUND),
     COACH_NOT_FOUND ("Không tìm thấy huấn luyện viên phù hợp!", HttpStatus.NOT_FOUND),
     MATCH_NOT_FOUND ("Không tìm thấy trận đấu nào!", HttpStatus.NOT_FOUND),
     TICKET_NOT_FOUND ("Không tìm thấy vé!", HttpStatus.NOT_FOUND),

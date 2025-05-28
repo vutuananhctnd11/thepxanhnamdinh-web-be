@@ -33,7 +33,6 @@ public class CoachController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<CoachShortInfoResponse>>> getAllCoach() {
         ApiResponse<List<CoachShortInfoResponse>> apiResponse = new ApiResponse<>(coachService.getAllCoach());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

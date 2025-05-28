@@ -108,6 +108,10 @@ public class PlayerService {
     public PlayerResponse createPlayer (CreatePlayerRequest request) {
         Club club;
 
+        if (playerRepository.existsByShirtNumberAndDeleteFlagIsFalse(request.getShirtNumber())) {
+            throw new CustomException(ErrorCode.SHIRT_NUMBER_INVALID);
+        }
+
         if (request.getClubId() != null) {
             club = clubRepository.findByClubIdAndDeleteFlagIsFalse(request.getClubId())
                     .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));

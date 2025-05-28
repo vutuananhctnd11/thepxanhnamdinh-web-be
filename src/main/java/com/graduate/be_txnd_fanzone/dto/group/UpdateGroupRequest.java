@@ -14,4 +14,5 @@ public class UpdateGroupRequest {
     Boolean censorPost;
     Boolean censorMember;
     String avatarImage;
+    String description;
 }
