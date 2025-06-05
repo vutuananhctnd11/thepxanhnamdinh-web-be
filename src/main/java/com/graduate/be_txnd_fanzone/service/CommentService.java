@@ -1,10 +1,12 @@
 package com.graduate.be_txnd_fanzone.service;
 
+import com.graduate.be_txnd_fanzone.dto.ApiResponse;
 import com.graduate.be_txnd_fanzone.dto.comment.CommentResponse;
 import com.graduate.be_txnd_fanzone.dto.comment.CreateCommentRequest;
 import com.graduate.be_txnd_fanzone.dto.comment.UpdateCommentRequest;
 import com.graduate.be_txnd_fanzone.enums.ErrorCode;
 import com.graduate.be_txnd_fanzone.exception.CustomException;
+import com.graduate.be_txnd_fanzone.exception.GlobalExceptionHandler;
 import com.graduate.be_txnd_fanzone.mapper.CommentMapper;
 import com.graduate.be_txnd_fanzone.model.Comment;
 import com.graduate.be_txnd_fanzone.model.Post;
@@ -12,18 +14,24 @@ import com.graduate.be_txnd_fanzone.model.User;
 import com.graduate.be_txnd_fanzone.repository.CommentRepository;
 import com.graduate.be_txnd_fanzone.repository.PostRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
+import jakarta.validation.ConstraintViolation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,6 +107,5 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(ErrorCode.CMT_NOT_FOUND));
         commentRepository.delete(updateComment);
         messagingTemplate.convertAndSend("/topic/comment.deleted", commentId);
-        System.out.println("đã xóa ============");
     }
 }

@@ -7,6 +7,7 @@ import com.graduate.be_txnd_fanzone.dto.club.ClubResponse;
 import com.graduate.be_txnd_fanzone.dto.club.CreateClubRequest;
 import com.graduate.be_txnd_fanzone.dto.club.UpdateClubRequest;
 import com.graduate.be_txnd_fanzone.service.ClubService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,13 +26,13 @@ public class ClubController {
     ClubService clubService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ClubResponse>> createClub (@RequestBody CreateClubRequest request){
+    public ResponseEntity<ApiResponse<ClubResponse>> createClub (@RequestBody @Valid CreateClubRequest request){
         ApiResponse<ClubResponse> response = new ApiResponse<>(clubService.createClub(request));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<ClubResponse>> updateClub (@RequestBody UpdateClubRequest request){
+    public ResponseEntity<ApiResponse<ClubResponse>> updateClub (@RequestBody @Valid UpdateClubRequest request){
         ApiResponse<ClubResponse> response = new ApiResponse<>(clubService.updateClub(request));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

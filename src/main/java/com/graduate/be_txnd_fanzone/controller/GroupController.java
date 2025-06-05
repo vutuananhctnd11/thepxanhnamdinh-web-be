@@ -9,6 +9,7 @@ import com.graduate.be_txnd_fanzone.dto.group.UpdateGroupRequest;
 import com.graduate.be_txnd_fanzone.dto.search.SearchGroupResponse;
 import com.graduate.be_txnd_fanzone.dto.search.SearchRequest;
 import com.graduate.be_txnd_fanzone.service.GroupService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,13 +29,13 @@ public class GroupController {
     GroupService groupService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<GroupResponse>> createGroup(@RequestBody CreateGroupRequest request) {
+    public ResponseEntity<ApiResponse<GroupResponse>> createGroup(@RequestBody @Valid CreateGroupRequest request) {
         ApiResponse<GroupResponse> response = new ApiResponse<>(groupService.createGroup(request));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<GroupResponse>> updateGroup(@RequestBody UpdateGroupRequest request) {
+    public ResponseEntity<ApiResponse<GroupResponse>> updateGroup(@RequestBody @Valid UpdateGroupRequest request) {
         ApiResponse<GroupResponse> response = new ApiResponse<>(groupService.updateGroup(request));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

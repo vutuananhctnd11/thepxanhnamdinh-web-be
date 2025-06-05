@@ -40,6 +40,13 @@ public enum ErrorCode {
     HEAD_COACH_INVALID("Đã tồn tại HLV trưởng, bạn không thể tạo thêm!", HttpStatus.BAD_REQUEST),
     ORDER_TICKET_NOT_FOUND("Không tìm thấy đơn đặt hàng tương ứng!", HttpStatus.NOT_FOUND),
     REPORT_NOT_FOUND("Không tìm thấy báo cáo vi phạm tương ứng!", HttpStatus.NOT_FOUND),
+
+    // validation
+    INVALID_DOB("Tuổi nhập vào phải trong khoảng từ {min} đến {max} tuổi", HttpStatus.BAD_REQUEST),
+    INVALID_KEY("Error key sai", HttpStatus.BAD_REQUEST),
+    FIELD_NOT_BLANK("{name} không được để trống!", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL("{name} không đúng định dạng của một email!", HttpStatus.BAD_REQUEST),
+    INVALID_SIZE("{name} phải có độ dài từ {min} đến {max} ký tự!", HttpStatus.BAD_REQUEST),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;

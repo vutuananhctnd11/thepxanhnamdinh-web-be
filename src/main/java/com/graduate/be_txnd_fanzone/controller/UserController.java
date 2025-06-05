@@ -8,6 +8,7 @@ import com.graduate.be_txnd_fanzone.dto.search.SearchUserResponse;
 import com.graduate.be_txnd_fanzone.dto.user.*;
 import com.graduate.be_txnd_fanzone.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +26,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(@RequestBody @Valid CreateUserRequest request) {
         ApiResponse<CreateUserResponse> apiResponse = new ApiResponse<>(userService.createUser(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -49,7 +50,7 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletResponse httpResponse) {
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request, HttpServletResponse httpResponse) {
         userService.forgotPassword(request.getIdentifier(), httpResponse);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }
@@ -100,7 +101,7 @@ public class UserController {
 
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<UserShortInfoResponse>> createUserByAdmin (@RequestBody AdminCreateUserRequest request) {
+    public ResponseEntity<ApiResponse<UserShortInfoResponse>> createUserByAdmin (@RequestBody @Valid AdminCreateUserRequest request) {
         ApiResponse<UserShortInfoResponse> apiResponse = new ApiResponse<>(userService.createUserByAdmin(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }

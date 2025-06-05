@@ -15,6 +15,7 @@ import com.graduate.be_txnd_fanzone.repository.CommentRepository;
 import com.graduate.be_txnd_fanzone.repository.PostRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
 import com.graduate.be_txnd_fanzone.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +27,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +39,7 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/comments")
+@Validated
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentController {
@@ -44,12 +47,12 @@ public class CommentController {
     CommentService commentService;
 
     @MessageMapping("/comment.send")
-    public void createComment(@Payload CreateCommentRequest request, Principal principal) {
+    public void createComment(@Payload @Valid CreateCommentRequest request, Principal principal) {
         commentService.createComment(request, principal);
     }
 
     @MessageMapping("/comment.update")
-    public void updateComment(@Payload UpdateCommentRequest request, Principal principal) {
+    public void updateComment(@Payload @Valid UpdateCommentRequest request, Principal principal) {
         commentService.authenticate(principal);
         commentService.updateComment(request);
     }
@@ -61,7 +64,7 @@ public class CommentController {
     }
 
     @MessageMapping("/comment.delete")
-    public void updateComment(@Payload DeleteCommentRequest request, Principal principal) {
+    public void updateComment(@Payload @Valid DeleteCommentRequest request, Principal principal) {
         commentService.authenticate(principal);
         commentService.deleteComment(request.getCommentId());
     }

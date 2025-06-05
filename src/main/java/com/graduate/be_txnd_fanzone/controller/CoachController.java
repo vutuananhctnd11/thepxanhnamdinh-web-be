@@ -8,6 +8,7 @@ import com.graduate.be_txnd_fanzone.dto.coach.CoachShortInfoResponse;
 import com.graduate.be_txnd_fanzone.dto.coach.CreateCoachRequest;
 import com.graduate.be_txnd_fanzone.dto.coach.UpdateCoachRequest;
 import com.graduate.be_txnd_fanzone.service.CoachService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,7 +41,7 @@ public class CoachController {
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<CoachInfoResponse>> createCoach (@RequestBody CreateCoachRequest request) {
+    public ResponseEntity<ApiResponse<CoachInfoResponse>> createCoach (@RequestBody @Valid CreateCoachRequest request) {
         ApiResponse<CoachInfoResponse> apiResponse = new ApiResponse<>(coachService.createCoach(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -54,7 +55,7 @@ public class CoachController {
 
     @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<CoachInfoResponse>> updateCoach (@RequestBody UpdateCoachRequest request) {
+    public ResponseEntity<ApiResponse<CoachInfoResponse>> updateCoach (@RequestBody @Valid UpdateCoachRequest request) {
         ApiResponse<CoachInfoResponse> apiResponse = new ApiResponse<>(coachService.updateCoach(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

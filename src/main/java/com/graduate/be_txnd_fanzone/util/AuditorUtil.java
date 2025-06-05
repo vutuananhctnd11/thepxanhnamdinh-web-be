@@ -1,7 +1,5 @@
 package com.graduate.be_txnd_fanzone.util;
 
-import com.graduate.be_txnd_fanzone.dto.CustomUserDetails;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
