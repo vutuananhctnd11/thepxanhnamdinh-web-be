@@ -1,16 +1,16 @@
-package com.graduate.be_txnd_fanzone.validator.Size;
+package com.graduate.be_txnd_fanzone.validator.Length;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Objects;
 
-public class SizeValidator implements ConstraintValidator<SizeConstraint, String> {
+public class LengthValidator implements ConstraintValidator<LengthConstraint, String> {
     private int min;
     private int max;
 
     @Override
-    public void initialize(SizeConstraint constraintAnnotation) {
+    public void initialize(LengthConstraint constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
         min = constraintAnnotation.min();
         max = constraintAnnotation.max();
@@ -18,10 +18,10 @@ public class SizeValidator implements ConstraintValidator<SizeConstraint, String
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (Objects.isNull(value)) {
-            return true;
+        if (!Objects.isNull(value)) {
+            int length = value.length();
+            return length >= min && length <= max;
         }
-        int size = Integer.parseInt(value);
-        return size >= min && size <= max;
+        return true;
     }
 }

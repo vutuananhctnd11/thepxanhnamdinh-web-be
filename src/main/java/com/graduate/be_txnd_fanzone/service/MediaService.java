@@ -8,6 +8,7 @@ import com.graduate.be_txnd_fanzone.mapper.MediaMapper;
 import com.graduate.be_txnd_fanzone.model.Media;
 import com.graduate.be_txnd_fanzone.model.Post;
 import com.graduate.be_txnd_fanzone.repository.MediaRepository;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ public class MediaService {
     MediaMapper mediaMapper;
     MediaRepository mediaRepository;
 
-    public Media createMedia(CreateMediaRequest createMediaRequest) {
+    public Media createMedia(@Valid CreateMediaRequest createMediaRequest) {
         Media media = mediaMapper.toMedia(createMediaRequest);
         return mediaRepository.save(media);
     }

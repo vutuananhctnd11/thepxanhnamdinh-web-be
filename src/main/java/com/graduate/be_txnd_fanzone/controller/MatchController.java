@@ -5,6 +5,7 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.match.*;
 import com.graduate.be_txnd_fanzone.dto.ticket.CreateListTicketRequest;
 import com.graduate.be_txnd_fanzone.service.MatchService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -42,13 +43,13 @@ public class MatchController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<MatchInfoResponse>> createMatch (@RequestBody CreateMatchRequest request){
+    public ResponseEntity<ApiResponse<MatchInfoResponse>> createMatch (@RequestBody @Valid CreateMatchRequest request){
         ApiResponse<MatchInfoResponse> apiResponse = new ApiResponse<>(matchService.createMatch(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<UpdateMatchResponse>> updateMatch (@RequestBody UpdateMatchRequest request){
+    public ResponseEntity<ApiResponse<UpdateMatchResponse>> updateMatch (@RequestBody @Valid UpdateMatchRequest request){
         ApiResponse<UpdateMatchResponse> apiResponse = new ApiResponse<>(matchService.updateMatch(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -83,7 +84,7 @@ public class MatchController {
     }
 
     @PostMapping("/open-sell-ticket")
-    public ResponseEntity<ApiResponse<String>> openSellTicket (@RequestBody CreateListTicketRequest request) {
+    public ResponseEntity<ApiResponse<String>> openSellTicket (@RequestBody @Valid CreateListTicketRequest request) {
         matchService.openSellTicket(request);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }

@@ -4,7 +4,7 @@ import com.graduate.be_txnd_fanzone.validator.DateOfBirth.DobConstraint;
 import com.graduate.be_txnd_fanzone.validator.Email.EmailConstraint;
 import com.graduate.be_txnd_fanzone.validator.NotBlank.NotBlankConstraint;
 import com.graduate.be_txnd_fanzone.validator.Phone.PhoneConstraint;
-import com.graduate.be_txnd_fanzone.validator.Size.SizeConstraint;
+import com.graduate.be_txnd_fanzone.validator.Length.LengthConstraint;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateUserRequest {
 
-    @SizeConstraint(min = 6, max = 16, name = "Mật khẩu")
+    @LengthConstraint(min = 6, max = 16, name = "Mật khẩu")
     String password;
 
     @NotBlankConstraint(name = "Họ tên đệm")

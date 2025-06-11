@@ -6,6 +6,7 @@ import com.graduate.be_txnd_fanzone.dto.login.LoginResponse;
 import com.graduate.be_txnd_fanzone.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +26,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
         ApiResponse<LoginResponse> apiResponse = new ApiResponse<>(authenticationService.authenticate(loginRequest, response));
         return new ResponseEntity<>(apiResponse, HttpStatus.ACCEPTED);
     }

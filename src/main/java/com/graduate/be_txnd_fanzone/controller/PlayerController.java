@@ -5,6 +5,7 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.player.*;
 import com.graduate.be_txnd_fanzone.repository.PlayerRepository;
 import com.graduate.be_txnd_fanzone.service.PlayerService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -46,14 +47,14 @@ public class PlayerController {
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<PlayerResponse>> createPlayer (@RequestBody CreatePlayerRequest request) {
+    public ResponseEntity<ApiResponse<PlayerResponse>> createPlayer (@RequestBody @Valid CreatePlayerRequest request) {
         ApiResponse<PlayerResponse> apiResponse = new ApiResponse<>(playerService.createPlayer(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<PlayerInfoResponse>> updatePlayer (@RequestBody UpdatePlayerRequest request) {
+    public ResponseEntity<ApiResponse<PlayerInfoResponse>> updatePlayer (@RequestBody @Valid UpdatePlayerRequest request) {
         ApiResponse<PlayerInfoResponse> apiResponse =  new ApiResponse<>(playerService.updatePlayer(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

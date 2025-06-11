@@ -5,6 +5,7 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.post.*;
 import com.graduate.be_txnd_fanzone.model.Post;
 import com.graduate.be_txnd_fanzone.service.PostService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,19 +24,19 @@ public class PostController {
     PostService postService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<NewsFeedResponse>> createPost(@RequestBody CreatePostRequest request) {
+    public ResponseEntity<ApiResponse<NewsFeedResponse>> createPost(@RequestBody @Valid CreatePostRequest request) {
         ApiResponse<NewsFeedResponse> apiResponse = new ApiResponse<>(postService.createPost(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost(@RequestBody UpdatePostRequest request) {
+    public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost(@RequestBody @Valid UpdatePostRequest request) {
         ApiResponse<UpdatePostResponse> apiResponse = new ApiResponse<>(postService.updatePost(request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PatchMapping("/status")
-    public ResponseEntity<ApiResponse<String>> changePostStatus(@RequestBody UpdatePostStatusRequest request) {
+    public ResponseEntity<ApiResponse<String>> changePostStatus(@RequestBody @Valid UpdatePostStatusRequest request) {
         postService.changeStatus(request);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.OK);
     }

@@ -1,4 +1,4 @@
-package com.graduate.be_txnd_fanzone.validator.Size;
+package com.graduate.be_txnd_fanzone.validator.Length;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -11,9 +11,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = {SizeValidator.class})
-public @interface SizeConstraint {
-    String message() default "INVALID_SIZE";
+@Constraint(validatedBy = {LengthValidator.class})
+public @interface LengthConstraint {
+    String message() default "INVALID_LENGTH";
 
     String name();
 

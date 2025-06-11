@@ -5,6 +5,7 @@ import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.report.CreateReportRequest;
 import com.graduate.be_txnd_fanzone.dto.report.ReportResponse;
 import com.graduate.be_txnd_fanzone.service.ReportService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,7 +29,7 @@ public class ReportController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> createReport (@RequestBody CreateReportRequest request) {
+    public ResponseEntity<ApiResponse<String>> createReport (@RequestBody @Valid CreateReportRequest request) {
         reportService.createReport(request);
         return new ResponseEntity<>(new ApiResponse<>(null), HttpStatus.CREATED);
     }

@@ -46,7 +46,8 @@ public enum ErrorCode {
     INVALID_KEY("Error key sai", HttpStatus.BAD_REQUEST),
     FIELD_NOT_BLANK("{name} không được để trống!", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL("{name} không đúng định dạng của một email!", HttpStatus.BAD_REQUEST),
-    INVALID_SIZE("{name} phải có độ dài từ {min} đến {max} ký tự!", HttpStatus.BAD_REQUEST),
+    INVALID_LENGTH("{name} phải có độ dài từ {min} đến {max} ký tự!", HttpStatus.BAD_REQUEST),
+    INVALID_SIZE("{name} phải có giá trị trong khoảng {min} đến {max}!", HttpStatus.BAD_REQUEST),
     ;
     ErrorCode(String message, HttpStatus httpStatus) {
         this.message = message;
