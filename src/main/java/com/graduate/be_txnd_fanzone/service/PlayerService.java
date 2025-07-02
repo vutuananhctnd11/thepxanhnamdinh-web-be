@@ -39,9 +39,12 @@ public class PlayerService {
 
     @PostConstruct
     public void init() {
-        Club myClub = clubRepository.findByAllowDeleteIsFalse()
-                .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
-        myClubId = myClub.getClubId();
+        try {
+            Club myClub = clubRepository.findByAllowDeleteIsFalse()
+                    .orElseThrow(() -> new CustomException(ErrorCode.CLUB_NOT_FOUND));
+            myClubId = myClub.getClubId();
+        } catch (Exception ignored) {
+        }
     }
 
     public SquadResponse getSquad() {
