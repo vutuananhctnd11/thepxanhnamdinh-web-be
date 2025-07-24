@@ -1,6 +1,7 @@
 package com.graduate.be_txnd_fanzone.service;
 
 import com.graduate.be_txnd_fanzone.dto.CustomUserDetails;
+import com.graduate.be_txnd_fanzone.dto.PageableListResponse;
 import com.graduate.be_txnd_fanzone.dto.orderTicket.ListOrderTicketRequest;
 import com.graduate.be_txnd_fanzone.dto.orderTicket.OrderTicketHistoryResponse;
 import com.graduate.be_txnd_fanzone.dto.orderTicket.OrderTicketInfoRequest;
@@ -14,10 +15,15 @@ import com.graduate.be_txnd_fanzone.repository.OrderTicketDetailRepository;
 import com.graduate.be_txnd_fanzone.repository.OrderTicketRepository;
 import com.graduate.be_txnd_fanzone.repository.TicketRepository;
 import com.graduate.be_txnd_fanzone.repository.UserRepository;
+import com.graduate.be_txnd_fanzone.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +43,7 @@ public class OrderTicketService {
     UserRepository userRepository;
     VnpayService vnpayService;
     EmailService emailService;
+    SecurityUtil securityUtil;
 
     @Transactional
     public String orderTicket(ListOrderTicketRequest request, HttpServletRequest httpRequest) {
@@ -110,7 +117,16 @@ public class OrderTicketService {
         orderTicketRepository.save(orderTicket);
     }
 
-    public OrderTicketHistoryResponse getOrderTicketHistory() {
-        return null;
+    public PageableListResponse<OrderTicketHistoryResponse> getOrderTicketHistory(int page, int limit) {
+        Long userLoginId = securityUtil.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("createDate").descending());
+        PageableListResponse<OrderTicketHistoryResponse> response = new PageableListResponse<>();
+
+        Page<OrderTicketHistoryResponse> pageResponse = orderTicketRepository.getListOrderTicketDetailOfUserLogin(userLoginId, pageable);
+        response.setTotalPage((long) pageResponse.getTotalPages());
+        response.setLimit(limit);
+        response.setPage(page);
+        response.setListResults(pageResponse.getContent());
+        return response;
     }
 }
