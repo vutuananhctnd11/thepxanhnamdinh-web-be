@@ -5,7 +5,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Objects;
 
-public class SizeValidator implements ConstraintValidator<SizeConstraint, String> {
+public class SizeValidator implements ConstraintValidator<SizeConstraint, Object> {
     private int min;
     private int max;
 
@@ -17,11 +17,14 @@ public class SizeValidator implements ConstraintValidator<SizeConstraint, String
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
         if (Objects.isNull(value)) {
             return true;
         }
-        int size = Integer.parseInt(value);
-        return size >= min && size <= max;
+        if (value instanceof Number number) {
+            return number.intValue() >= min && number.intValue() <= max;
+        } else {
+            return false;
+        }
     }
 }

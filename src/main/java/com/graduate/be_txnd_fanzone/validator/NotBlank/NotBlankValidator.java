@@ -3,7 +3,7 @@ package com.graduate.be_txnd_fanzone.validator.NotBlank;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class NotBlankValidator implements ConstraintValidator<NotBlankConstraint, String> {
+public class NotBlankValidator implements ConstraintValidator<NotBlankConstraint, Object> {
 
     @Override
     public void initialize(NotBlankConstraint constraintAnnotation) {
@@ -11,7 +11,12 @@ public class NotBlankValidator implements ConstraintValidator<NotBlankConstraint
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        return value != null && !value.trim().isEmpty();
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
+        if (value instanceof String val) {
+            return !val.trim().isEmpty();
+        } else {
+            return value != null;
+        }
+
     }
 }

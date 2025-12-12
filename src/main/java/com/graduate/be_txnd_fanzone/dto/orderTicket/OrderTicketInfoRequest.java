@@ -2,6 +2,7 @@ package com.graduate.be_txnd_fanzone.dto.orderTicket;
 
 import com.graduate.be_txnd_fanzone.validator.NotBlank.NotBlankConstraint;
 import com.graduate.be_txnd_fanzone.validator.Length.LengthConstraint;
+import com.graduate.be_txnd_fanzone.validator.Size.SizeConstraint;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +15,6 @@ public class OrderTicketInfoRequest {
     Long ticketId;
 
     @NotBlankConstraint(name = "Số lượng vé")
-    @LengthConstraint(min = 0, max = 10, name = "Số lượng vé")
+    @SizeConstraint(min = 0, max = 10, name = "Số lượng vé")
     Integer quantity;
 }

@@ -5,7 +5,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Objects;
 
-public class LengthValidator implements ConstraintValidator<LengthConstraint, String> {
+public class LengthValidator implements ConstraintValidator<LengthConstraint, Object> {
     private int min;
     private int max;
 
@@ -17,9 +17,14 @@ public class LengthValidator implements ConstraintValidator<LengthConstraint, St
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
         if (!Objects.isNull(value)) {
-            int length = value.length();
+            int length = 0;
+            if (value instanceof String str) {
+                length = str.length();
+            } else if (value instanceof Number num) {
+                length = num.toString().length();
+            }
             return length >= min && length <= max;
         }
         return true;
